@@ -23,7 +23,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .ciclo import UFS, ConfigCiclo
-from .cliente import ClienteTSE
+from .cliente import MAX_REQ_PADRAO, ClienteTSE
 from .codigos import Caminhos, validar
 from .descoberta import descobrir_pleito
 from .laco import rodar
@@ -47,7 +47,8 @@ def argumentos(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--uma-vez", action="store_true", help="executa um único ciclo e sai")
     p.add_argument("--varredura-completa", action="store_true", help="reconsulta todas as seções publicadas")
     p.add_argument("--conexoes", type=int, default=64)
-    p.add_argument("--max-req", type=float, default=200.0, help="teto de requisições por segundo")
+    p.add_argument("--max-req", type=float, default=MAX_REQ_PADRAO,
+                   help=f"teto de requisições por segundo (padrão {MAX_REQ_PADRAO:.0f})")
     p.add_argument("--min-livre-gb", type=float, default=5.0)
     p.add_argument("--sem-caffeinate", action="store_true")
     a = p.parse_args(argv)

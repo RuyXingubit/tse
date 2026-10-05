@@ -1,15 +1,17 @@
 """Cliente HTTP para resultados.tse.jus.br com cortesia e resiliência.
 
-- No máximo `concorrencia` requisições simultâneas (padrão 64) e teto rígido de
-  `max_req_por_s` (padrão 200/s). O orçamento `x-ratelimit-limit: 2000` do TSE parece ser
-  GLOBAL (compartilhado por todos os clientes), por isso a taxa é adaptativa (AIMD):
-  cada episódio de bloqueio corta a taxa pela metade (piso `min_req_por_s`) e a cada
-  `aumentar_a_cada` sucessos seguidos ela sobe 10%, nunca acima do teto configurado.
+- No máximo `concorrencia` requisições simultâneas e teto rígido de `max_req_por_s`
+  (padrão 60/s). Na noite da eleição o Akamai do TSE bloqueou o IP (429 por IP, sem
+  Retry-After) após ~1 min a ~170 req/s; por isso o padrão é conservador.
+- Taxa adaptativa (AIMD): cada episódio de bloqueio corta a taxa pela metade (piso
+  `min_req_por_s`); a cada `aumentar_a_cada` sucessos seguidos sobe 10%, nunca acima do teto.
 - 404 → None (ainda não publicado).
 - Erro de rede / 5xx → novas tentativas com backoff exponencial.
-- 403/429/503 → pausa GLOBAL (nenhuma requisição sai durante a pausa) e tenta de novo;
-  respeita Retry-After. Bloqueios de requisições enviadas antes do fim da última pausa
-  não disparam nova pausa (são respostas atrasadas do mesmo episódio).
+- 403/429/503 → pausa GLOBAL (nenhuma requisição sai durante a pausa). Ao fim da pausa,
+  UMA requisição de sonda verifica se o bloqueio acabou; se ainda bloqueado, a pausa dobra
+  (`pausa_bloqueio` → … → `pausa_max`). Episódios seguidos só "esquecem" após
+  `aumentar_a_cada` sucessos. Respeita Retry-After. Bloqueios de requisições enviadas antes
+  do fim da última pausa não disparam nova pausa (são respostas atrasadas do mesmo episódio).
 - TLS sempre verificado; sem redirecionamentos (3xx é tratado como erro).
 """
 
@@ -28,7 +30,9 @@ log = logging.getLogger(__name__)
 BASE_URL = "https://resultados.tse.jus.br/oficial/"
 USER_AGENT = "tse-coleta/0.1 (preservacao de dados publicos; contato via repositorio)"
 STATUS_BLOQUEIO = {403, 429, 503}
-CABECALHOS_DIAGNOSTICO = ("retry-after", "x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset", "server")
+CABECALHOS_DIAGNOSTICO = ("retry-after", "x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset",
+                          "akamai-grn", "cdn-cache-status")
+MAX_REQ_PADRAO = 60.0
 
 
 class ErroDownload(RuntimeError):
@@ -41,13 +45,14 @@ class ClienteTSE:
         base_url: str = BASE_URL,
         *,
         concorrencia: int = 64,
-        max_req_por_s: float | None = 200.0,
+        max_req_por_s: float | None = MAX_REQ_PADRAO,
         min_req_por_s: float = 10.0,
-        aumentar_a_cada: int = 500,
+        aumentar_a_cada: int = 2000,
         max_tentativas: int = 6,
         backoff_base: float = 1.0,
         backoff_max: float = 60.0,
         pausa_bloqueio: float = 120.0,
+        pausa_max: float = 15 * 60.0,
         timeout: float = 60.0,
         transport: httpx.AsyncBaseTransport | None = None,
         dormir: Callable[[float], Awaitable[None]] = asyncio.sleep,
@@ -70,6 +75,7 @@ class ClienteTSE:
         self._intervalo = (1.0 / max_req_por_s) if max_req_por_s else 0.0
         self._aumentar_a_cada = aumentar_a_cada
         self._sucessos_seguidos = 0
+        self._episodios_seguidos = 0  # bloqueios sem um período saudável entre eles
         self._geracao = 0  # incrementa ao fim de cada pausa de bloqueio
         self._proximo = 0.0
         self._relogio = relogio
@@ -77,6 +83,7 @@ class ClienteTSE:
         self._base = backoff_base
         self._teto = backoff_max
         self._pausa_bloqueio = pausa_bloqueio
+        self._pausa_max = pausa_max
         self._dormir = dormir
         self.estatisticas: Counter[str] = Counter()
 
@@ -113,11 +120,12 @@ class ClienteTSE:
             return self._geracao
 
     def _registrar_sucesso(self) -> None:
-        if not self._teto_taxa or self._taxa_atual >= self._teto_taxa:
-            return
         self._sucessos_seguidos += 1
-        if self._sucessos_seguidos >= self._aumentar_a_cada:
-            self._sucessos_seguidos = 0
+        if self._sucessos_seguidos < self._aumentar_a_cada:
+            return
+        self._sucessos_seguidos = 0
+        self._episodios_seguidos = 0  # período saudável: a próxima pausa volta ao tamanho base
+        if self._teto_taxa and self._taxa_atual < self._teto_taxa:
             self._definir_taxa(min(self._teto_taxa, self._taxa_atual * 1.1))
             log.info("taxa adaptativa subiu para %.0f req/s", self._taxa_atual)
 
@@ -148,7 +156,7 @@ class ClienteTSE:
                 ultimo_erro = f"HTTP {r.status_code}"
                 if r.status_code in STATUS_BLOQUEIO:
                     self.estatisticas["bloqueio"] += 1
-                    await self._pausar(r, geracao)
+                    await self._pausar(r, rel, geracao)
                     continue
                 self.estatisticas[f"http_{r.status_code}"] += 1
             espera = min(self._teto, self._base * 2 ** (tentativa - 1))
@@ -157,26 +165,46 @@ class ClienteTSE:
         self.estatisticas["desistiu"] += 1
         raise ErroDownload(f"{rel}: {ultimo_erro} após {self._max} tentativas")
 
-    async def _pausar(self, r: httpx.Response, geracao: int) -> None:
+    def _duracao_pausa(self, r: httpx.Response) -> float:
+        ra = r.headers.get("Retry-After", "")
+        if ra.isdigit():
+            return min(max(float(ra), 1.0), self._pausa_max)
+        return min(self._pausa_max, self._pausa_bloqueio * 2 ** (self._episodios_seguidos - 1))
+
+    async def _pausar(self, r: httpx.Response, rel: str, geracao: int) -> None:
         if self._pausa.locked() or geracao < self._geracao:
             # episódio já em pausa, ou resposta atrasada de requisição enviada antes do fim
             # da última pausa: apenas espera a pausa vigente (se houver) e tenta de novo.
             async with self._pausa:
                 return
-        espera = self._pausa_bloqueio
-        ra = r.headers.get("Retry-After", "")
-        if ra.isdigit():
-            espera = min(max(float(ra), 1.0), 15 * 60.0)
         async with self._pausa:
-            self._sucessos_seguidos = 0
-            if self._taxa_atual:
-                self._definir_taxa(max(self._piso_taxa, self._taxa_atual / 2))
-            diag = {k: r.headers[k] for k in CABECALHOS_DIAGNOSTICO if k in r.headers}
-            self.estatisticas["pausas"] += 1
-            log.warning("TSE respondeu %s %s; pausando todas as requisições por %.0fs; taxa agora %s req/s",
-                        r.status_code, diag, espera,
-                        f"{self._taxa_atual:.0f}" if self._taxa_atual else "sem teto")
             try:
-                await self._dormir(espera)
+                self._sucessos_seguidos = 0
+                if self._taxa_atual:
+                    self._definir_taxa(max(self._piso_taxa, self._taxa_atual / 2))
+                self.estatisticas["pausas"] += 1
+                while True:
+                    self._episodios_seguidos += 1
+                    espera = self._duracao_pausa(r)
+                    diag = {k: r.headers[k] for k in CABECALHOS_DIAGNOSTICO if k in r.headers}
+                    log.warning("TSE respondeu %s %s; pausando todas as requisições por %.0fs "
+                                "(bloqueio seguido nº %d); taxa agora %s req/s",
+                                r.status_code, diag, espera, self._episodios_seguidos,
+                                f"{self._taxa_atual:.0f}" if self._taxa_atual else "sem teto")
+                    await self._dormir(espera)
+                    # sonda: uma única requisição verifica se o bloqueio acabou
+                    self.estatisticas["sondas"] += 1
+                    try:
+                        sonda = await self._http.get(rel)
+                    except httpx.TransportError:
+                        break  # não é bloqueio; os retries normais cuidam do erro de rede
+                    finally:
+                        if self._intervalo:
+                            self._proximo = self._relogio() + self._intervalo
+                    if sonda.status_code not in STATUS_BLOQUEIO:
+                        log.info("sonda respondeu %s: retomando a coleta", sonda.status_code)
+                        break
+                    self.estatisticas["sondas_bloqueadas"] += 1
+                    r = sonda
             finally:
                 self._geracao += 1

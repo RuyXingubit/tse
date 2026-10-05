@@ -67,19 +67,46 @@ async def test_desiste_apos_max_tentativas():
 
 
 @pytest.mark.parametrize("status", [403, 429, 503])
-async def test_bloqueio_pausa_e_tenta_de_novo(status):
-    c, dorm, _ = cliente_com([status, 200], pausa_bloqueio=120)
+async def test_bloqueio_pausa_sonda_e_tenta_de_novo(status):
+    c, dorm, ch = cliente_com([status, 200, 200], pausa_bloqueio=120)
     async with c:
         assert await c.obter("a") == b"ok"
     assert dorm.esperas == [120]
-    assert c.estatisticas["bloqueio"] == 1
+    assert len(ch) == 3  # original bloqueado + 1 sonda + nova tentativa
+    assert c.estatisticas["bloqueio"] == 1 and c.estatisticas["sondas"] == 1
 
 
 async def test_respeita_retry_after():
-    c, dorm, _ = cliente_com([(429, b"", {"Retry-After": "30"}), 200])
+    c, dorm, _ = cliente_com([(429, b"", {"Retry-After": "30"}), 200, 200])
     async with c:
         await c.obter("a")
     assert dorm.esperas == [30]
+
+
+async def test_sonda_bloqueada_dobra_a_pausa_ate_o_maximo():
+    c, dorm, ch = cliente_com([429, 429, 429, 429, 429, 200, 200], pausa_bloqueio=120, pausa_max=900)
+    async with c:
+        assert await c.obter("a") == b"ok"
+    assert dorm.esperas == [120, 240, 480, 900, 900]
+    assert c.estatisticas["pausas"] == 1 and c.estatisticas["sondas_bloqueadas"] == 4
+    assert len(ch) == 7
+
+
+async def test_bloqueios_seguidos_sem_periodo_saudavel_continuam_escalando():
+    # dois episódios separados por poucos sucessos: a 2ª pausa já começa dobrada
+    c, dorm, _ = cliente_com([429, 200, 200, 200, 429, 200, 200], pausa_bloqueio=100, aumentar_a_cada=50)
+    async with c:
+        for i in range(3):
+            await c.obter(f"{i}")
+    assert dorm.esperas == [100, 200]
+
+
+async def test_periodo_saudavel_volta_a_pausa_ao_tamanho_base():
+    c, dorm, _ = cliente_com([429, 200, 200, 200, 429, 200, 200], pausa_bloqueio=100, aumentar_a_cada=2)
+    async with c:
+        for i in range(3):
+            await c.obter(f"{i}")
+    assert dorm.esperas == [100, 100]
 
 
 async def test_redirecionamento_nao_e_seguido():
@@ -128,8 +155,8 @@ async def test_padroes_de_producao():
     c = ClienteTSE("https://exemplo.test/")
     try:
         assert c._sem._value == 64
-        assert c._intervalo == pytest.approx(1 / 200)
-        assert c.taxa_atual == 200
+        assert c._intervalo == pytest.approx(1 / 60)
+        assert c.taxa_atual == 60
     finally:
         await c.__aexit__(None, None, None)
 
@@ -152,7 +179,7 @@ def cliente_relogio(respostas, **kw):
 
 
 async def test_bloqueio_corta_taxa_pela_metade_ate_o_piso():
-    c, _, _ = cliente_relogio([429, 200, 429, 200, 429, 200, 429, 200],
+    c, _, _ = cliente_relogio([429, 200, 200] * 4,
                               max_req_por_s=200, min_req_por_s=30, pausa_bloqueio=1)
     async with c:
         for i in range(4):
@@ -163,7 +190,7 @@ async def test_bloqueio_corta_taxa_pela_metade_ate_o_piso():
 
 
 async def test_taxa_sobe_10pct_a_cada_n_sucessos_sem_passar_do_teto():
-    c, _, _ = cliente_relogio([429] + [200] * 40, max_req_por_s=200, aumentar_a_cada=5, pausa_bloqueio=1)
+    c, _, _ = cliente_relogio([429] + [200] * 41, max_req_por_s=200, aumentar_a_cada=5, pausa_bloqueio=1)
     async with c:
         await c.obter("bloqueado")
         assert c.taxa_atual == 100
@@ -178,7 +205,7 @@ async def test_taxa_sobe_10pct_a_cada_n_sucessos_sem_passar_do_teto():
 
 
 async def test_sem_teto_nao_ha_ajuste():
-    c, _, _ = cliente_relogio([429, 200], max_req_por_s=None, pausa_bloqueio=1)
+    c, _, _ = cliente_relogio([429, 200, 200], max_req_por_s=None, pausa_bloqueio=1)
     async with c:
         await c.obter("a")
     assert c.taxa_atual is None and c._intervalo == 0
@@ -186,7 +213,7 @@ async def test_sem_teto_nao_ha_ajuste():
 
 async def test_nada_sai_durante_a_pausa_e_retomada_e_espacada():
     import asyncio
-    c, rel, inicios = cliente_relogio([429] + [200] * 30, max_req_por_s=200, pausa_bloqueio=120, concorrencia=8)
+    c, rel, inicios = cliente_relogio([429] + [200] * 31, max_req_por_s=200, pausa_bloqueio=120, concorrencia=8)
     async with c:
         await asyncio.gather(*(c.obter(f"{i}") for i in range(30)))
     t_bloqueio = inicios[0][0]
@@ -203,14 +230,14 @@ async def test_nada_sai_durante_a_pausa_e_retomada_e_espacada():
 async def test_bloqueio_atrasado_de_antes_da_pausa_nao_gera_nova_pausa():
     import asyncio
     lento_pode_responder = asyncio.Event()
-    respostas = {"lento": [429, 200], "rapido": [429, 200]}
+    respostas = {"lento": [429, 200], "rapido": [429, 200, 200]}  # rapido: bloqueio, sonda, retry
 
     async def handler(req):
         nome = req.url.path.strip("/")
         st = respostas[nome].pop(0)
         if nome == "lento" and st == 429:
             await lento_pode_responder.wait()  # só responde depois que a pausa acabou
-        if nome == "rapido" and st == 200:
+        if nome == "rapido" and not respostas["rapido"]:  # retry após a pausa
             lento_pode_responder.set()
         return httpx.Response(st, content=b"ok")
 

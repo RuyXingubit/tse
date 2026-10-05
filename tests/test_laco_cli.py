@@ -131,7 +131,7 @@ def test_instancia_unica(tmp_path):
 
 def test_argumentos_validam(tmp_path):
     a = argumentos(["--raiz", str(tmp_path), "--ufs", "rr,ac"])
-    assert a.ufs == ("rr", "ac") and a.conexoes == 64 and a.max_req == 200
+    assert a.ufs == ("rr", "ac") and a.conexoes == 64 and a.max_req == 60
     with pytest.raises(Exception):
         argumentos(["--raiz", str(tmp_path), "--ufs", "../x"])
     with pytest.raises(SystemExit):
