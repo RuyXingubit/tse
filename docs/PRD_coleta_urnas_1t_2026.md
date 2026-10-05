@@ -77,3 +77,4 @@ Parse das listas por UF (inclui agregadas) · decodificação do hash TSE · val
 - 2026-10-04 ~22:50: sondagem dos endpoints (v5).
 - 2026-10-04 23:01: snapshot bootstrap manual (`scripts/snapshot_bootstrap.sh`) em `/Volumes/240/TSE/snapshots/`.
 - 2026-10-04 23:44: etapa 5 concluída; teste real RR (scratch) retomado do diário após 429: 1.519/1.519 urnas completas e finais, 0 pausas com AIMD, SHA256SUMS OK.
+- 2026-10-04 23:50: 1º ciclo nacional bloqueado pelo Akamai (429 por IP, sem Retry-After) após ~55 s a ~170 req/s (3.013 urnas salvas). Ajuste aprovado: teto padrão 60 req/s, pausas crescentes 2→4→8→15 min com sonda única antes de retomar, AIMD +10% a cada 2.000 sucessos.
