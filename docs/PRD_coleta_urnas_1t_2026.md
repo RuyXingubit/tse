@@ -41,6 +41,8 @@ Códigos são descobertos de `ele-c.json` em tempo de execução (não hardcoded
 - `espelho/` — cópia exata do caminho do TSE (a partir de `ele2026/…`).
 - `snapshots/<AAAA-MM-DDTHH-MM-SS>/` — listas por UF, manifesto (`manifesto.jsonl.gz`: uma linha por seção com status, `da`/`ha`, hash, se baixado/validado), agregados BR/UF do ciclo, `SHA256SUMS`. Somente-leitura após gravado. Gravado só se algo mudou.
 - Versões: se o hash de um BU/vsc mudar, a nova versão fica em seu próprio diretório `<hash>/` (o caminho do TSE já separa por hash) — o original nunca é tocado.
+- Arquivos que mudam no mesmo endereço do TSE (JSON auxiliar, listas, agregados) são gravados como `<nome>@<sha256[:16]>.json` — uma cópia por conteúdo distinto, nunca sobrescrita.
+- Gravação: arquivo temporário + `fsync` + `link` (falha se o destino existir → impossível sobrescrever, mesmo em corrida).
 - `logs/` — execução e erros.
 - Sem banco de dados: "já baixado" = arquivo existe no espelho e valida.
 
