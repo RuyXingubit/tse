@@ -53,8 +53,11 @@ Códigos são descobertos de `ele-c.json` em tempo de execução (não hardcoded
 4. Agregados: BR/UF de todos os cargos a cada ciclo; município uma vez ao fechar 100% e de novo na varredura final.
 5. Grava snapshot se algo mudou.
 6. Intervalo: 10 min enquanto houver progresso → 1 h após 24 h sem novidade → 6 h após mais 24 h.
-- Concorrência máx. **64** conexões + teto rígido de **200 req/s** (~10% do `x-ratelimit-limit: 2000` informado pelo TSE) — decisão do usuário em 2026-10-04 23:20. Medido em RR: 151 req/s, 1.519 urnas em 30 s, 0 bloqueios → 1ª passada nacional estimada em ~2h45. User-Agent identificado, retry com backoff exponencial, pausa automática em 403/429/503.
+- Concorrência máx. **64** conexões + teto rígido de **200 req/s** — decisão do usuário em 2026-10-04 23:20. Medido em RR: 151 req/s, 1.519 urnas em 30 s → 1ª passada nacional estimada em ~2h45. User-Agent identificado, retry com backoff exponencial, pausa automática em 403/429/503.
+- **Achado (23:36):** o `x-ratelimit-limit: 2000` aparenta ser um orçamento **global/compartilhado** da origem (uma requisição isolada já vê `remaining` ~1.650); recebemos 429 a ~160 req/s na noite da eleição. Logo, "200 = 10% do limite" não vale.
+- **Taxa adaptativa (AIMD), etapa 5:** cada episódio de bloqueio corta a taxa pela metade (piso 10 req/s); a cada 500 sucessos seguidos sobe 10%, **nunca acima do teto de 200**. Durante a pausa nenhuma requisição sai; ao retomar, as requisições saem espaçadas (sem rajada); 429 atrasados de requisições enviadas antes do fim da pausa não iniciam nova pausa. Logs mostram teto vigente, pausas e cabeçalhos de diagnóstico do 429.
 - Retomável: Ctrl+C a qualquer momento; ao reiniciar continua de onde parou. Roda local com `caffeinate`.
+- Agregados BR/UF ficam versionados por conteúdo no `espelho/` (não copiados em cada snapshot).
 
 ## 7. Stack
 Python 3.13 (Homebrew), httpx assíncrono, pytest. Venv local no projeto.
@@ -73,3 +76,4 @@ Parse das listas por UF (inclui agregadas) · decodificação do hash TSE · val
 ## 10. Marcos já realizados
 - 2026-10-04 ~22:50: sondagem dos endpoints (v5).
 - 2026-10-04 23:01: snapshot bootstrap manual (`scripts/snapshot_bootstrap.sh`) em `/Volumes/240/TSE/snapshots/`.
+- 2026-10-04 23:44: etapa 5 concluída; teste real RR (scratch) retomado do diário após 429: 1.519/1.519 urnas completas e finais, 0 pausas com AIMD, SHA256SUMS OK.
