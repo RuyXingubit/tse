@@ -1,0 +1,18 @@
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Dados coletados NUNCA vão para o Git (ficam em /Volumes/240/TSE)
+dados/
+espelho/
+snapshots/
+*.part
+*.dat
+*.vsc
+*.jez
+
+# macOS
+.DS_Store

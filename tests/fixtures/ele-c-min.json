@@ -1,0 +1,14 @@
+{ "dg" : "02/10/2026", "hg" : "18:30:57", "f" : "o", "idg" : "980407", "pl" : [
+{ "cd" : "452", "cdpr" : "439", "c" : "ele2024", "dt" : "06/10/2024", "e" : [
+{ "cd" : "619", "cdt2" : "620", "nm" : "Eleição Ordinária Municipal - 2024 - 06/10/2024 1º Turno", "t" : "1", "tp" : "3", "abr" : [
+{ "cd" : "br", "cp" : [ { "cd" : "11", "ds" : "Prefeito", "tp" : "1" }, { "cd" : "13", "ds" : "Vereador", "tp" : "2" } ] } ] } ] },
+{ "cd" : "3237", "cdpr" : "1235", "c" : "ele2024", "dt" : "21/06/2026", "e" : [
+{ "cd" : "6278", "cdt2" : "6279", "nm" : "Eleição Suplementar - Roraima", "t" : "1", "tp" : "2", "abr" : [
+{ "cd" : "rr", "cp" : [ { "cd" : "3", "ds" : "Governador", "tp" : "1" } ] } ] } ] },
+{ "cd" : "3220", "cdpr" : "1219", "c" : "ele2026", "dt" : "04/10/2026", "e" : [
+{ "cd" : "6257", "cdt2" : "6258", "nm" : "Eleição Ordinária Federal - 2026 1º Turno", "t" : "1", "tp" : "8", "abr" : [
+{ "cd" : "br", "cp" : [ { "cd" : "1", "ds" : "Presidente", "tp" : "1" } ] } ] },
+{ "cd" : "6259", "cdt2" : "6260", "nm" : "Eleição Ordinária Estadual - 2026 1º Turno", "t" : "1", "tp" : "1", "abr" : [
+{ "cd" : "br", "cp" : [ { "cd" : "3", "ds" : "Governador", "tp" : "1" }, { "cd" : "5", "ds" : "Senador", "tp" : "1" }, { "cd" : "6", "ds" : "Deputado Federal", "tp" : "2" }, { "cd" : "7", "ds" : "Deputado Estadual", "tp" : "2" }, { "cd" : "8", "ds" : "Deputado Distrital", "tp" : "2" } ] } ] },
+{ "cd" : "6261", "cdt2" : "", "nm" : "Eleição Ordinária Municipal - 2026 - 04/10/2026 1º Turno", "t" : "1", "tp" : "3", "abr" : [
+{ "cd" : "br", "cp" : [ { "cd" : "25", "ds" : "Conselheiro Distrital", "tp" : "2" } ] } ] } ] } ] }
