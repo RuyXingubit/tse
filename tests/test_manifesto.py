@@ -70,9 +70,10 @@ def test_snapshot_somente_leitura_e_checksums(tmp_path):
 
 def test_snapshot_nunca_reutiliza_pasta(tmp_path):
     lay = Layout(tmp_path)
-    gravar_snapshot(lay, "N", {}, {}, {})
-    with pytest.raises(FileExistsError):
-        gravar_snapshot(lay, "N", {}, {}, {})
+    p1 = gravar_snapshot(lay, "N", {}, {}, {"a": 1})
+    p2 = gravar_snapshot(lay, "N", {}, {}, {"a": 2})
+    assert p1.name == "N" and p2.name == "N-2"
+    assert '"a": 1' in (p1 / "resumo.json").read_text()
 
 
 def test_ultimo_snapshot_ignora_pastas_sem_manifesto(tmp_path):

@@ -7,6 +7,9 @@ dependencies = [
     "httpx>=0.28",
 ]
 
+[project.scripts]
+tse-coleta = "tse_coleta.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3",

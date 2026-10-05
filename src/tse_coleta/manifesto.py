@@ -145,7 +145,14 @@ def gravar_snapshot(
 ) -> Path:
     """Cria snapshots/<nome>/ com listas, manifesto, resumo e SHA256SUMS; deixa somente-leitura."""
     destino = layout.snapshots / nome
-    destino.mkdir(parents=True, exist_ok=False)  # nunca reutiliza pasta existente
+    for i in range(2, 100):
+        try:
+            destino.mkdir(parents=True, exist_ok=False)  # nunca reutiliza pasta existente
+            break
+        except FileExistsError:
+            destino = layout.snapshots / f"{nome}-{i}"
+    else:
+        raise FileExistsError(f"não foi possível criar snapshot {nome}")
     arquivos: dict[str, bytes] = {f"listas/{uf}.json": b for uf, b in sorted(listas.items())}
     arquivos["manifesto.jsonl.gz"] = serializar_manifesto(registros)
     arquivos["resumo.json"] = json.dumps(resumo, ensure_ascii=False, indent=2, sort_keys=True).encode()

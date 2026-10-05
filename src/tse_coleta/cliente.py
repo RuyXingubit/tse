@@ -1,10 +1,15 @@
 """Cliente HTTP para resultados.tse.jus.br com cortesia e resiliência.
 
 - No máximo `concorrencia` requisições simultâneas (padrão 64) e teto rígido de
-  `max_req_por_s` (padrão 200/s ≈ 10% do limite informado pelo TSE em x-ratelimit-limit).
+  `max_req_por_s` (padrão 200/s). O orçamento `x-ratelimit-limit: 2000` do TSE parece ser
+  GLOBAL (compartilhado por todos os clientes), por isso a taxa é adaptativa (AIMD):
+  cada episódio de bloqueio corta a taxa pela metade (piso `min_req_por_s`) e a cada
+  `aumentar_a_cada` sucessos seguidos ela sobe 10%, nunca acima do teto configurado.
 - 404 → None (ainda não publicado).
 - Erro de rede / 5xx → novas tentativas com backoff exponencial.
-- 403/429/503 → pausa GLOBAL (todas as tarefas esperam) e tenta de novo; respeita Retry-After.
+- 403/429/503 → pausa GLOBAL (nenhuma requisição sai durante a pausa) e tenta de novo;
+  respeita Retry-After. Bloqueios de requisições enviadas antes do fim da última pausa
+  não disparam nova pausa (são respostas atrasadas do mesmo episódio).
 - TLS sempre verificado; sem redirecionamentos (3xx é tratado como erro).
 """
 
@@ -23,6 +28,7 @@ log = logging.getLogger(__name__)
 BASE_URL = "https://resultados.tse.jus.br/oficial/"
 USER_AGENT = "tse-coleta/0.1 (preservacao de dados publicos; contato via repositorio)"
 STATUS_BLOQUEIO = {403, 429, 503}
+CABECALHOS_DIAGNOSTICO = ("retry-after", "x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset", "server")
 
 
 class ErroDownload(RuntimeError):
@@ -36,6 +42,8 @@ class ClienteTSE:
         *,
         concorrencia: int = 64,
         max_req_por_s: float | None = 200.0,
+        min_req_por_s: float = 10.0,
+        aumentar_a_cada: int = 500,
         max_tentativas: int = 6,
         backoff_base: float = 1.0,
         backoff_max: float = 60.0,
@@ -56,7 +64,13 @@ class ClienteTSE:
         self._sem = asyncio.Semaphore(concorrencia)
         self._pausa = asyncio.Lock()
         self._taxa = asyncio.Lock()
+        self._teto_taxa = max_req_por_s
+        self._piso_taxa = min(min_req_por_s, max_req_por_s) if max_req_por_s else None
+        self._taxa_atual = max_req_por_s
         self._intervalo = (1.0 / max_req_por_s) if max_req_por_s else 0.0
+        self._aumentar_a_cada = aumentar_a_cada
+        self._sucessos_seguidos = 0
+        self._geracao = 0  # incrementa ao fim de cada pausa de bloqueio
         self._proximo = 0.0
         self._relogio = relogio
         self._max = max_tentativas
@@ -72,16 +86,40 @@ class ClienteTSE:
     async def __aexit__(self, *exc) -> None:
         await self._http.aclose()
 
-    async def _respeitar_taxa(self) -> None:
-        """Teto rígido: espaça o início das requisições em pelo menos 1/max_req_por_s."""
-        if not self._intervalo:
-            return
+    @property
+    def taxa_atual(self) -> float | None:
+        """Taxa máxima vigente (req/s) após o ajuste adaptativo; None = sem teto."""
+        return self._taxa_atual
+
+    def _definir_taxa(self, nova: float) -> None:
+        self._taxa_atual = nova
+        self._intervalo = 1.0 / nova
+
+    async def _liberar_envio(self) -> int:
+        """Espera pausa de bloqueio e o espaçamento da taxa. Devolve a geração vigente.
+
+        A espera pela pausa fica DENTRO do lock da taxa: assim nada sai durante a pausa e,
+        ao retomar, as requisições continuam espaçadas (sem rajada).
+        """
         async with self._taxa:
-            agora = self._relogio()
-            if self._proximo > agora:
-                await self._dormir(self._proximo - agora)
-                agora = self._proximo
-            self._proximo = agora + self._intervalo
+            async with self._pausa:
+                pass
+            if self._intervalo:
+                agora = self._relogio()
+                if self._proximo > agora:
+                    await self._dormir(self._proximo - agora)
+                    agora = self._proximo
+                self._proximo = agora + self._intervalo
+            return self._geracao
+
+    def _registrar_sucesso(self) -> None:
+        if not self._teto_taxa or self._taxa_atual >= self._teto_taxa:
+            return
+        self._sucessos_seguidos += 1
+        if self._sucessos_seguidos >= self._aumentar_a_cada:
+            self._sucessos_seguidos = 0
+            self._definir_taxa(min(self._teto_taxa, self._taxa_atual * 1.1))
+            log.info("taxa adaptativa subiu para %.0f req/s", self._taxa_atual)
 
     async def obter(self, rel: str) -> bytes | None:
         """Baixa `rel` (relativo à base). None se 404."""
@@ -90,7 +128,7 @@ class ClienteTSE:
             async with self._pausa:  # se alguém está em pausa de bloqueio, espera aqui
                 pass
             async with self._sem:
-                await self._respeitar_taxa()
+                geracao = await self._liberar_envio()
                 try:
                     r = await self._http.get(rel)
                 except httpx.TransportError as e:
@@ -101,14 +139,16 @@ class ClienteTSE:
                 if r.status_code == 200:
                     self.estatisticas["ok"] += 1
                     self.estatisticas["bytes"] += len(r.content)
+                    self._registrar_sucesso()
                     return r.content
                 if r.status_code == 404:
                     self.estatisticas["404"] += 1
+                    self._registrar_sucesso()
                     return None
                 ultimo_erro = f"HTTP {r.status_code}"
                 if r.status_code in STATUS_BLOQUEIO:
                     self.estatisticas["bloqueio"] += 1
-                    await self._pausar(r)
+                    await self._pausar(r, geracao)
                     continue
                 self.estatisticas[f"http_{r.status_code}"] += 1
             espera = min(self._teto, self._base * 2 ** (tentativa - 1))
@@ -117,14 +157,26 @@ class ClienteTSE:
         self.estatisticas["desistiu"] += 1
         raise ErroDownload(f"{rel}: {ultimo_erro} após {self._max} tentativas")
 
-    async def _pausar(self, r: httpx.Response) -> None:
+    async def _pausar(self, r: httpx.Response, geracao: int) -> None:
+        if self._pausa.locked() or geracao < self._geracao:
+            # episódio já em pausa, ou resposta atrasada de requisição enviada antes do fim
+            # da última pausa: apenas espera a pausa vigente (se houver) e tenta de novo.
+            async with self._pausa:
+                return
         espera = self._pausa_bloqueio
         ra = r.headers.get("Retry-After", "")
         if ra.isdigit():
             espera = min(max(float(ra), 1.0), 15 * 60.0)
-        if self._pausa.locked():  # outra tarefa já está pausando; só espera ela
-            async with self._pausa:
-                return
         async with self._pausa:
-            log.warning("TSE respondeu %s; pausando todas as requisições por %.0fs", r.status_code, espera)
-            await self._dormir(espera)
+            self._sucessos_seguidos = 0
+            if self._taxa_atual:
+                self._definir_taxa(max(self._piso_taxa, self._taxa_atual / 2))
+            diag = {k: r.headers[k] for k in CABECALHOS_DIAGNOSTICO if k in r.headers}
+            self.estatisticas["pausas"] += 1
+            log.warning("TSE respondeu %s %s; pausando todas as requisições por %.0fs; taxa agora %s req/s",
+                        r.status_code, diag, espera,
+                        f"{self._taxa_atual:.0f}" if self._taxa_atual else "sem teto")
+            try:
+                await self._dormir(espera)
+            finally:
+                self._geracao += 1
