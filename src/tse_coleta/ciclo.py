@@ -22,8 +22,10 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from .agregados import EstadoAgregados, coletar_agregados
 from .cliente import ClienteTSE, ErroDownload
 from .codigos import Caminhos
+from .descoberta import Pleito
 from .coleta_secao import ResultadoSecao, coletar_secao
 from .espelho import Espelho
 from .manifesto import (
@@ -35,6 +37,7 @@ from .manifesto import (
     gravar_estado_atual,
     gravar_snapshot,
     mudou,
+    substituir_atomico,
 )
 from .secoes import Secao, ler_lista_secoes
 
@@ -77,6 +80,7 @@ async def executar_ciclo(
     cfg: ConfigCiclo = ConfigCiclo(),
     agora: Callable[[], datetime] = _agora_local,
     progresso: Callable[[int, int], None] | None = None,
+    pleito: Pleito | None = None,
 ) -> ResultadoCiclo:
     inicio = agora()
     layout.criar()
@@ -110,7 +114,9 @@ async def executar_ciclo(
     finally:
         diario.fechar()  # se interrompido, o diário fica no disco para retomar
 
+    agregados = await _agregados(cliente, espelho, layout, caminhos, pleito, registros, cfg) if pleito else None
     resumo = _resumo(registros, listas, coletadas, cliente, inicio, agora(), cfg)
+    resumo["agregados"] = agregados
     houve_mudanca = mudou(historico, registros)
     snap = None
     if houve_mudanca:
@@ -121,6 +127,21 @@ async def executar_ciclo(
     gravar_estado_atual(layout, registros)  # antes de apagar o diário
     diario.encerrar()
     return ResultadoCiclo(snap, houve_mudanca, resumo["terminado"], resumo)
+
+
+async def _agregados(cliente, espelho, layout, caminhos, pleito, registros, cfg) -> dict:
+    """Falha nos agregados não derruba o ciclo das urnas: registra e segue."""
+    estado = (
+        EstadoAgregados.de_json(layout.estado_agregados.read_text())
+        if layout.estado_agregados.is_file() else EstadoAgregados()
+    )
+    try:
+        r = await coletar_agregados(cliente, espelho, caminhos, pleito, registros, estado, cfg.varredura_completa)
+    except Exception as e:  # noqa: BLE001 — isolamento proposital
+        log.exception("falha nos agregados")
+        r = {"erro": f"{type(e).__name__}: {e}"}
+    substituir_atomico(layout.estado_agregados, estado.para_json().encode())
+    return r
 
 
 async def _baixar_listas(cliente: ClienteTSE, caminhos: Caminhos, ufs) -> dict[str, bytes]:

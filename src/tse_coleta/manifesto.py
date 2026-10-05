@@ -69,6 +69,7 @@ class Layout:
         self.logs = self.raiz / "logs"
         self.diario = self.estado / "ciclo_em_andamento.jsonl"
         self.estado_atual = self.estado / "estado_atual.jsonl.gz"
+        self.estado_agregados = self.estado / "agregados.json"
 
     def criar(self) -> None:
         for p in (self.espelho, self.snapshots, self.estado, self.logs):
@@ -102,16 +103,21 @@ def ultimo_snapshot_com_manifesto(layout: Layout) -> Path | None:
     return candidatos[-1] if candidatos else None
 
 
+def substituir_atomico(destino: Path, conteudo: bytes) -> None:
+    """Para arquivos de ESTADO (mutáveis por natureza). Nunca usar para dados coletados."""
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    tmp = destino.with_name(destino.name + ".tmp")
+    with open(tmp, "wb") as f:
+        f.write(conteudo)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, destino)
+
+
 def gravar_estado_atual(layout: Layout, registros: dict[str, Registro]) -> None:
     """Estado de trabalho (inclui carimbos de verificação). Substituído atomicamente a cada ciclo.
     NÃO é histórico — o histórico imutável fica em snapshots/."""
-    layout.estado.mkdir(parents=True, exist_ok=True)
-    tmp = layout.estado_atual.with_name(layout.estado_atual.name + ".tmp")
-    with open(tmp, "wb") as f:
-        f.write(serializar_manifesto(registros))
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, layout.estado_atual)
+    substituir_atomico(layout.estado_atual, serializar_manifesto(registros))
 
 
 def carregar_estado(layout: Layout) -> tuple[dict[str, Registro] | None, dict[str, Registro] | None]:

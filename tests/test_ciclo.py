@@ -166,3 +166,39 @@ async def test_data_hora_alterada_na_lista_forca_recoleta(tmp_path):
     serv = ServidorFalso(r)
     await rodar(tmp_path, serv, T0 + timedelta(minutes=5))
     assert CAM.aux_secao(S1) in serv.pedidos
+
+
+async def test_ciclo_com_agregados(tmp_path):
+    import json as _json
+    from tse_coleta.agregados import CONFIG_GERAL
+    from tse_coleta.descoberta import Cargo, Eleicao, Pleito
+    pleito = Pleito("ele2026", "3220", "04/10/2026", (Eleicao("6257", "F", "1", (Cargo("1", "Presidente"),)),))
+    r = rotas("Totalizada", s3_publicada=True)
+    r[CONFIG_GERAL] = b'{"pl": []}'
+    r[CAM.config_municipios("6257")] = _json.dumps({"abr": [{"cd": "rr", "mu": [{"cd": "03085"}]}]}).encode()
+    r[CAM.agregado("6257", "1", "br")] = b'{"v": 1}'
+    r[CAM.agregado("6257", "1", "rr")] = b'{"v": 1}'
+    r[CAM.agregado("6257", "1", "rr", "03085")] = b'{"m": 1}'
+    async with ClienteTSE("https://t.test/oficial/", transport=httpx.MockTransport(ServidorFalso(r)),
+                          dormir=sem_espera) as c:
+        res = await executar_ciclo(c, Layout(tmp_path), CAM, CFG, agora=lambda: T0, pleito=pleito)
+    ag = res.resumo["agregados"]
+    assert ag["uf_br"] == {"novo": 2}
+    assert ag["municipios"] == {"novo": 1} and ag["municipios_fechados"] == 1
+    assert Layout(tmp_path).estado_agregados.is_file()
+
+
+async def test_falha_nos_agregados_nao_derruba_ciclo(tmp_path, monkeypatch):
+    import tse_coleta.ciclo as ciclo_mod
+    from tse_coleta.descoberta import Cargo, Eleicao, Pleito
+
+    async def explode(*a, **k):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(ciclo_mod, "coletar_agregados", explode)
+    pleito = Pleito("ele2026", "3220", "04/10/2026", (Eleicao("6257", "F", "1", (Cargo("1", "P"),)),))
+    async with ClienteTSE("https://t.test/oficial/", transport=httpx.MockTransport(ServidorFalso(rotas())),
+                          dormir=sem_espera) as c:
+        res = await executar_ciclo(c, Layout(tmp_path), CAM, CFG, agora=lambda: T0, pleito=pleito)
+    assert res.snapshot is not None
+    assert "boom" in res.resumo["agregados"]["erro"]
