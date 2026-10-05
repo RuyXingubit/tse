@@ -1,6 +1,7 @@
 """Cliente HTTP para resultados.tse.jus.br com cortesia e resiliência.
 
-- No máximo `concorrencia` requisições simultâneas.
+- No máximo `concorrencia` requisições simultâneas (padrão 64) e teto rígido de
+  `max_req_por_s` (padrão 200/s ≈ 10% do limite informado pelo TSE em x-ratelimit-limit).
 - 404 → None (ainda não publicado).
 - Erro de rede / 5xx → novas tentativas com backoff exponencial.
 - 403/429/503 → pausa GLOBAL (todas as tarefas esperam) e tenta de novo; respeita Retry-After.
@@ -11,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from collections import Counter
 from collections.abc import Awaitable, Callable
 
@@ -32,7 +34,8 @@ class ClienteTSE:
         self,
         base_url: str = BASE_URL,
         *,
-        concorrencia: int = 8,
+        concorrencia: int = 64,
+        max_req_por_s: float | None = 200.0,
         max_tentativas: int = 6,
         backoff_base: float = 1.0,
         backoff_max: float = 60.0,
@@ -40,6 +43,7 @@ class ClienteTSE:
         timeout: float = 60.0,
         transport: httpx.AsyncBaseTransport | None = None,
         dormir: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        relogio: Callable[[], float] = time.monotonic,
     ):
         self._http = httpx.AsyncClient(
             base_url=base_url,
@@ -51,6 +55,10 @@ class ClienteTSE:
         )
         self._sem = asyncio.Semaphore(concorrencia)
         self._pausa = asyncio.Lock()
+        self._taxa = asyncio.Lock()
+        self._intervalo = (1.0 / max_req_por_s) if max_req_por_s else 0.0
+        self._proximo = 0.0
+        self._relogio = relogio
         self._max = max_tentativas
         self._base = backoff_base
         self._teto = backoff_max
@@ -64,6 +72,17 @@ class ClienteTSE:
     async def __aexit__(self, *exc) -> None:
         await self._http.aclose()
 
+    async def _respeitar_taxa(self) -> None:
+        """Teto rígido: espaça o início das requisições em pelo menos 1/max_req_por_s."""
+        if not self._intervalo:
+            return
+        async with self._taxa:
+            agora = self._relogio()
+            if self._proximo > agora:
+                await self._dormir(self._proximo - agora)
+                agora = self._proximo
+            self._proximo = agora + self._intervalo
+
     async def obter(self, rel: str) -> bytes | None:
         """Baixa `rel` (relativo à base). None se 404."""
         ultimo_erro = "?"
@@ -71,6 +90,7 @@ class ClienteTSE:
             async with self._pausa:  # se alguém está em pausa de bloqueio, espera aqui
                 pass
             async with self._sem:
+                await self._respeitar_taxa()
                 try:
                     r = await self._http.get(rel)
                 except httpx.TransportError as e:

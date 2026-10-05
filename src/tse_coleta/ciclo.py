@@ -54,7 +54,7 @@ class ListaIndisponivel(RuntimeError):
 class ConfigCiclo:
     ufs: tuple[str, ...] = UFS
     reverificar_recebidas_apos: timedelta = timedelta(minutes=30)
-    trabalhadores: int = 32
+    trabalhadores: int = 160  # > concorrência HTTP: cada seção faz requisições em sequência
     varredura_completa: bool = False
 
 

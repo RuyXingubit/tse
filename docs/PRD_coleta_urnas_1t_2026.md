@@ -53,7 +53,7 @@ Códigos são descobertos de `ele-c.json` em tempo de execução (não hardcoded
 4. Agregados: BR/UF de todos os cargos a cada ciclo; município uma vez ao fechar 100% e de novo na varredura final.
 5. Grava snapshot se algo mudou.
 6. Intervalo: 10 min enquanto houver progresso → 1 h após 24 h sem novidade → 6 h após mais 24 h.
-- Concorrência máx. 8, User-Agent identificado, retry com backoff exponencial, pausa automática em 403/429/503.
+- Concorrência máx. **64** conexões + teto rígido de **200 req/s** (~10% do `x-ratelimit-limit: 2000` informado pelo TSE) — decisão do usuário em 2026-10-04 23:20. Medido em RR: 151 req/s, 1.519 urnas em 30 s, 0 bloqueios → 1ª passada nacional estimada em ~2h45. User-Agent identificado, retry com backoff exponencial, pausa automática em 403/429/503.
 - Retomável: Ctrl+C a qualquer momento; ao reiniciar continua de onde parou. Roda local com `caffeinate`.
 
 ## 7. Stack
