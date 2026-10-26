@@ -9,6 +9,7 @@ dependencies = [
 
 [project.scripts]
 tse-coleta = "tse_coleta.cli:main"
+tse-auditoria = "tse_coleta.cli:main_auditoria"
 
 [project.optional-dependencies]
 dev = [
