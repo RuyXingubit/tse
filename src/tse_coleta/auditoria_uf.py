@@ -63,7 +63,10 @@ def carregar_hashes_snapshot_1t(raiz: Path, uf: str) -> dict[str, dict]:
         achados: dict[str, dict] = {}
         try:
             with gzip.open(snap / "manifesto.jsonl.gz", "rt", encoding="utf-8") as f:
+                prefixo_busca = f'"{uf}-'
                 for linha in f:
+                    if prefixo_busca not in linha:
+                        continue
                     r = json.loads(linha)
                     if r.get("uf") == uf and r.get("tem_urna"):
                         achados[r["chave"]] = {
@@ -121,8 +124,11 @@ async def _baixar_e_validar_bu(
     nome_vsc: str,
     nome_bu: str,
 ) -> tuple[bytes, BoletimUrnaDecodificado] | tuple[None, str]:
-    """Baixa `vota.vsc` e `bu.dat` em memória, valida os hashes e decodifica o BU."""
-    vsc = await cliente.obter(cam.arquivo_urna(sec, hash_hex, nome_vsc))
+    """Baixa `vota.vsc` e `bu.dat` em memória em paralelo, valida os hashes e decodifica o BU."""
+    vsc, bu_bytes = await asyncio.gather(
+        cliente.obter(cam.arquivo_urna(sec, hash_hex, nome_vsc)),
+        cliente.obter(cam.arquivo_urna(sec, hash_hex, nome_bu)),
+    )
     if not vsc:
         return None, "vota.vsc 404"
     try:
@@ -131,7 +137,6 @@ async def _baixar_e_validar_bu(
     except HashInvalido as e:
         return None, str(e)
 
-    bu_bytes = await cliente.obter(cam.arquivo_urna(sec, hash_hex, nome_bu))
     if not bu_bytes:
         return None, "bu.dat 404"
     if not arquivo_confere_com_vsc(bu_bytes, vsc):
@@ -195,9 +200,9 @@ async def processar_secao_1t_2t(
             v1 = aux_1t.versoes[0]
             hash_1t_atual = v1.hash_hex
             status_1t = aux_1t.status
-            nome_vsc_1t = v1.arquivos.get("vota", nome_vsc_1t)
-            nome_bu_1t = v1.arquivos.get("bu", nome_bu_1t)
-            nome_log_1t = v1.arquivos.get("log", nome_log_1t)
+            nome_vsc_1t = v1.arquivos.get("vota") or v1.arquivos.get("sa") or nome_vsc_1t
+            nome_bu_1t = v1.arquivos.get("bu") or v1.arquivos.get("busa") or nome_bu_1t
+            nome_log_1t = v1.arquivos.get("log") or v1.arquivos.get("logsa") or nome_log_1t
         else:
             erros.append("1T aux indisponível")
     else:
@@ -210,19 +215,22 @@ async def processar_secao_1t_2t(
             cliente, cam_1t, sec_id, hash_1t_atual, nome_vsc_1t, nome_bu_1t
         )
         if res_1t[0] is None:
-            # Se falhou usando o atalho do snapshot, consulta o aux_1t real como fallback
+            # Se falhou usando o atalho do snapshot (ex.: seção apurada via SA -sa.vsc/-busa.dat), consulta o aux_1t real
             aux_1t = await _obter_aux(cliente, cam_1t, sec_id)
             if aux_1t and aux_1t.versoes:
                 v1 = aux_1t.versoes[0]
                 hash_1t_atual = v1.hash_hex
                 status_1t = aux_1t.status
+                nome_vsc_1t = v1.arquivos.get("vota") or v1.arquivos.get("sa") or nome_vsc_1t
+                nome_bu_1t = v1.arquivos.get("bu") or v1.arquivos.get("busa") or nome_bu_1t
+                nome_log_1t = v1.arquivos.get("log") or v1.arquivos.get("logsa") or nome_log_1t
                 res_1t = await _baixar_e_validar_bu(
                     cliente,
                     cam_1t,
                     sec_id,
                     hash_1t_atual,
-                    v1.arquivos.get("vota", nome_vsc_1t),
-                    v1.arquivos.get("bu", nome_bu_1t),
+                    nome_vsc_1t,
+                    nome_bu_1t,
                 )
         if res_1t[0] is None:
             erros.append(f"1T {res_1t[1]}")
@@ -234,7 +242,9 @@ async def processar_secao_1t_2t(
     status_2t = ""
     vsc_2t: bytes | None = None
     bu_2t: BoletimUrnaDecodificado | None = None
+    nome_bu_2t = ""
     nome_log_2t = ""
+    bytes_log_2t: bytes | None = None
 
     if sec_2t and sec_2t.publicada:
         aux_2t = await _obter_aux(cliente, cam_2t, sec_id)
@@ -242,13 +252,21 @@ async def processar_secao_1t_2t(
             v2 = aux_2t.versoes[0]
             hash_2t = v2.hash_hex
             status_2t = aux_2t.status
-            nome_vsc_2t = v2.arquivos.get("vota", "")
-            nome_bu_2t = v2.arquivos.get("bu", "")
-            nome_log_2t = v2.arquivos.get("log", "")
+            nome_vsc_2t = v2.arquivos.get("vota") or v2.arquivos.get("sa") or ""
+            nome_bu_2t = v2.arquivos.get("bu") or v2.arquivos.get("busa") or ""
+            nome_log_2t = v2.arquivos.get("log") or v2.arquivos.get("logsa") or ""
             if nome_vsc_2t and nome_bu_2t:
-                res_2t = await _baixar_e_validar_bu(
-                    cliente, cam_2t, sec_id, hash_2t, nome_vsc_2t, nome_bu_2t
-                )
+                if nome_log_2t:
+                    res_2t, bytes_log_2t = await asyncio.gather(
+                        _baixar_e_validar_bu(
+                            cliente, cam_2t, sec_id, hash_2t, nome_vsc_2t, nome_bu_2t
+                        ),
+                        cliente.obter(cam_2t.arquivo_urna(sec_id, hash_2t, nome_log_2t)),
+                    )
+                else:
+                    res_2t = await _baixar_e_validar_bu(
+                        cliente, cam_2t, sec_id, hash_2t, nome_vsc_2t, nome_bu_2t
+                    )
                 if res_2t[0] is None:
                     erros.append(f"2T {res_2t[1]}")
                 else:
@@ -260,27 +278,29 @@ async def processar_secao_1t_2t(
     else:
         erros.append("2T não publicada")
 
+    apuracao_sa_1t = nome_bu_1t.endswith("-busa.dat") or (bu_1t is not None and not bu_1t.abertura)
+    apuracao_sa_2t = nome_bu_2t.endswith("-busa.dat") or (bu_2t is not None and not bu_2t.abertura)
+
     # --- LOGS DA URNA (2T log.jez já traz 1T + 2T quando a urna física é a mesma) ---
     log_1t = ResumoLogTurno(data=DATA_1T, presente=False)
     log_2t = ResumoLogTurno(data=DATA_2T, presente=False)
 
-    if hash_2t and nome_log_2t and vsc_2t:
-        bytes_log_2t = await cliente.obter(cam_2t.arquivo_urna(sec_id, hash_2t, nome_log_2t))
-        if bytes_log_2t:
-            if arquivo_confere_com_vsc(bytes_log_2t, vsc_2t):
-                try:
-                    logs = analisar_log_por_datas(bytes_log_2t, (DATA_1T, DATA_2T), uf=uf)
-                    log_1t = logs[DATA_1T]
-                    log_2t = logs[DATA_2T]
-                except ErroAnaliseLog as e:
-                    erros.append(f"2T log inválido: {e}")
-            else:
-                erros.append("2T log.jez SHA-512 ausente no vsc")
-        del bytes_log_2t
+    if hash_2t and nome_log_2t and vsc_2t and bytes_log_2t:
+        if arquivo_confere_com_vsc(bytes_log_2t, vsc_2t):
+            try:
+                logs = analisar_log_por_datas(bytes_log_2t, (DATA_1T, DATA_2T), uf=uf)
+                log_1t = logs[DATA_1T]
+                log_2t = logs[DATA_2T]
+            except ErroAnaliseLog as e:
+                erros.append(f"2T log inválido: {e}")
+        else:
+            erros.append("2T log.jez SHA-512 ausente no vsc")
+    del bytes_log_2t
 
     # Se o log do 2T não continha todos os votos de 04/10/2026 (ex. urna trocada ou contingência no 1T), baixa o log do 1T
     precisa_log_1t = (
         bu_1t is not None
+        and not apuracao_sa_1t
         and bu_1t.comparecimento_urna > 0
         and log_1t.votos_computados != bu_1t.comparecimento_urna
         and bool(hash_1t_atual)
@@ -333,6 +353,8 @@ async def processar_secao_1t_2t(
         "local": local,
         "completa_1t": bu_1t is not None,
         "completa_2t": bu_2t is not None,
+        "apuracao_sa_1t": apuracao_sa_1t,
+        "apuracao_sa_2t": apuracao_sa_2t,
         "status_1t": status_1t,
         "status_2t": status_2t,
         "erros": erros,
@@ -376,19 +398,34 @@ async def processar_secao_1t_2t(
 
 def _carregar_resumos_existentes(arq_jsonl: Path) -> dict[str, dict]:
     existentes: dict[str, dict] = {}
-    if not arq_jsonl.is_file():
-        return existentes
-    with open(arq_jsonl, "r", encoding="utf-8") as f:
-        for linha in f:
-            linha = linha.strip()
-            if not linha:
-                continue
-            try:
-                r = json.loads(linha)
-                if r.get("completa_1t") and r.get("completa_2t"):
-                    existentes[r["chave"]] = r
-            except json.JSONDecodeError:
-                continue
+    arq_gz = arq_jsonl.with_suffix(".jsonl.gz")
+    if arq_gz.is_file():
+        try:
+            with gzip.open(arq_gz, "rt", encoding="utf-8") as fg:
+                for linha in fg:
+                    linha = linha.strip()
+                    if not linha:
+                        continue
+                    try:
+                        r = json.loads(linha)
+                        if r.get("completa_1t") and r.get("completa_2t"):
+                            existentes[r["chave"]] = r
+                    except json.JSONDecodeError:
+                        continue
+        except OSError:
+            pass
+    if arq_jsonl.is_file():
+        with open(arq_jsonl, "r", encoding="utf-8") as f:
+            for linha in f:
+                linha = linha.strip()
+                if not linha:
+                    continue
+                try:
+                    r = json.loads(linha)
+                    if r.get("completa_1t") and r.get("completa_2t"):
+                        existentes[r["chave"]] = r
+                except json.JSONDecodeError:
+                    continue
     return existentes
 
 
@@ -472,23 +509,26 @@ async def executar_auditoria_uf(
             n_trab = min(trabalhadores, len(pendentes))
             await asyncio.gather(*(trabalhador() for _ in range(n_trab)))
 
-    # Regrava `resumo_secoes.jsonl` limpo/ordenado e gera `resumo_secoes.jsonl.gz`
+    # Grava `resumo_secoes.jsonl.gz` compactado e remove o `.jsonl` bruto descompactado para economizar disco
     registros_ordenados = [prontas[k] for k in sorted(prontas)]
-    tmp_jsonl = arq_jsonl.with_suffix(".jsonl.tmp")
-    with open(tmp_jsonl, "w", encoding="utf-8") as f_plain, gzip.open(
-        arq_gz, "wt", encoding="utf-8"
-    ) as f_gz:
+    tmp_gz = arq_gz.with_suffix(".gz.tmp")
+    with gzip.open(tmp_gz, "wt", encoding="utf-8") as f_gz:
         for reg in registros_ordenados:
-            linha = json.dumps(reg, ensure_ascii=False, sort_keys=True) + "\n"
-            f_plain.write(linha)
-            f_gz.write(linha)
-    os.replace(tmp_jsonl, arq_jsonl)
+            f_gz.write(json.dumps(reg, ensure_ascii=False, sort_keys=True) + "\n")
+    os.replace(tmp_gz, arq_gz)
+    if arq_jsonl.is_file():
+        try:
+            arq_jsonl.unlink()
+        except OSError:
+            pass
 
     # Baixa agregados oficiais da UF (1T e 2T) para batimento matemático
-    ag_pres_1t = await baixar_agregado_oficial(cliente, ELEICAO_PRES_1T, "1", uf)
-    ag_pres_2t = await baixar_agregado_oficial(cliente, ELEICAO_PRES_2T, "1", uf)
-    ag_gov_1t = await baixar_agregado_oficial(cliente, ELEICAO_EST_1T, "3", uf)
-    ag_gov_2t = await baixar_agregado_oficial(cliente, ELEICAO_EST_2T, "3", uf)
+    ag_pres_1t, ag_pres_2t, ag_gov_1t, ag_gov_2t = await asyncio.gather(
+        baixar_agregado_oficial(cliente, ELEICAO_PRES_1T, "1", uf),
+        baixar_agregado_oficial(cliente, ELEICAO_PRES_2T, "1", uf),
+        baixar_agregado_oficial(cliente, ELEICAO_EST_1T, "3", uf),
+        baixar_agregado_oficial(cliente, ELEICAO_EST_2T, "3", uf),
+    )
 
     analise = consolidar_analise_uf(
         uf=uf,
@@ -500,6 +540,13 @@ async def executar_auditoria_uf(
         ag_gov_1t=ag_gov_1t,
         ag_gov_2t=ag_gov_2t,
     )
+    lista_csv = (analise.get("prioridade_fiscais") or {}).pop(
+        "_lista_completa_csv",
+        (analise.get("prioridade_fiscais") or {}).get("lista_ordenada_por_tamanho", []),
+    )
+    exportar_csv_prioridade_fiscais(lista_csv, pasta_uf / f"prioridade_fiscais_{uf}.csv")
+    with open(pasta_uf / "auditoria_mesarios_biometria.json", "w", encoding="utf-8") as f_mes:
+        json.dump(analise.get("janela_manha_e_mesarios", {}), f_mes, ensure_ascii=False, indent=2)
     with open(arq_analise, "w", encoding="utf-8") as f_an:
         json.dump(analise, f_an, ensure_ascii=False, indent=2, sort_keys=True)
 
@@ -1103,8 +1150,10 @@ def consolidar_analise_uf(
                 )
                 score += 15.0
 
-        if (l1.get("presente") and l1.get("votos_computados") != r["comp_1t"]) or (
-            l2.get("presente") and l2.get("votos_computados") != r["comp_2t"]
+        sa_1t = bool(r.get("apuracao_sa_1t") or r.get("abertura_1t", "X") == "")
+        sa_2t = bool(r.get("apuracao_sa_2t") or r.get("abertura_2t", "X") == "")
+        if (not sa_1t and l1.get("presente") and l1.get("votos_computados") != r["comp_1t"]) or (
+            not sa_2t and l2.get("presente") and l2.get("votos_computados") != r["comp_2t"]
         ):
             divergencia_log_bu.append(
                 {
@@ -1672,3 +1721,84 @@ def consolidar_analise_uf(
         },
         "detalhe_aptos_alterados": detalhe_aptos_alterados,
     }
+
+
+async def consolidar_agregado_nacional(
+    cliente: ClienteTSE,
+    raiz: Path,
+    ufs: tuple[str, ...] | list[str],
+) -> tuple[Path, Path]:
+    """Consolida o agregado geral do Brasil ('br') a partir dos resumos por seção de todas as UFs."""
+    pasta_br = raiz / "auditoria" / "br"
+    pasta_br.mkdir(parents=True, exist_ok=True)
+    arq_analise = pasta_br / "analise_consolidada.json"
+    arq_csv = pasta_br / "prioridade_fiscais_br.csv"
+
+    todos_registros: list[dict] = []
+    agregadas_1t_tot = 0
+    agregadas_2t_tot = 0
+
+    for uf in ufs:
+        uf_l = uf.lower()
+        pasta_uf = raiz / "auditoria" / uf_l
+        arq_v2_gz = pasta_uf / "resumo_secoes_v2.jsonl.gz"
+        arq_gz = pasta_uf / "resumo_secoes.jsonl.gz"
+        arq_jsonl = pasta_uf / "resumo_secoes.jsonl"
+        arq_an_uf = pasta_uf / "analise_consolidada_v2.json"
+        if not arq_an_uf.is_file():
+            arq_an_uf = pasta_uf / "analise_consolidada.json"
+        if arq_an_uf.is_file():
+            try:
+                doc_an = json.loads(arq_an_uf.read_text(encoding="utf-8"))
+                t_uf = doc_an.get("totais") or {}
+                agregadas_1t_tot += int(t_uf.get("secoes_agregadas_1t", 0))
+                agregadas_2t_tot += int(t_uf.get("secoes_agregadas_2t", 0))
+            except (OSError, json.JSONDecodeError):
+                pass
+
+        fonte = arq_v2_gz if arq_v2_gz.is_file() else (arq_gz if arq_gz.is_file() else arq_jsonl)
+        if not fonte.is_file():
+            continue
+        abridor = gzip.open if fonte.suffix == ".gz" else open
+        with abridor(fonte, "rt", encoding="utf-8") as f:  # type: ignore[call-overload]
+            for linha in f:
+                linha = linha.strip()
+                if not linha:
+                    continue
+                try:
+                    r = json.loads(linha)
+                    # Prefixa o nome do município com a UF no consolidado nacional (ex.: "BELÉM/PA")
+                    nm = r.get("nome_municipio", "")
+                    uf_up = r.get("uf", uf_l).upper()
+                    if nm and not nm.endswith(f"/{uf_up}"):
+                        r["nome_municipio"] = f"{nm}/{uf_up}"
+                    todos_registros.append(r)
+                except json.JSONDecodeError:
+                    continue
+
+    ag_pres_1t, ag_pres_2t = await asyncio.gather(
+        baixar_agregado_oficial(cliente, ELEICAO_PRES_1T, "1", "br"),
+        baixar_agregado_oficial(cliente, ELEICAO_PRES_2T, "1", "br"),
+    )
+
+    analise_br = consolidar_analise_uf(
+        uf="br",
+        registros=todos_registros,
+        agregadas_1t=agregadas_1t_tot,
+        agregadas_2t=agregadas_2t_tot,
+        ag_pres_1t=ag_pres_1t,
+        ag_pres_2t=ag_pres_2t,
+        ag_gov_1t=None,
+        ag_gov_2t=None,
+    )
+    lista_csv = (analise_br.get("prioridade_fiscais") or {}).pop(
+        "_lista_completa_csv",
+        (analise_br.get("prioridade_fiscais") or {}).get("lista_ordenada_por_tamanho", []),
+    )
+    exportar_csv_prioridade_fiscais(lista_csv, arq_csv)
+    with open(pasta_br / "auditoria_mesarios_biometria.json", "w", encoding="utf-8") as f_mes:
+        json.dump(analise_br.get("janela_manha_e_mesarios", {}), f_mes, ensure_ascii=False, indent=2)
+    with open(arq_analise, "w", encoding="utf-8") as f_an:
+        json.dump(analise_br, f_an, ensure_ascii=False, indent=2, sort_keys=True)
+
+    return arq_analise, arq_csv

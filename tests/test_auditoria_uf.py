@@ -7,11 +7,13 @@ import httpx
 from test_analisador_log import construir_log_jez
 from test_decodificador_bu import construir_bu_sintetico
 from tse_coleta.auditoria_uf import (
+    consolidar_agregado_nacional,
     consolidar_analise_uf,
     enriquecer_logs_mesarios_secoes_criticas,
     executar_auditoria_uf,
     exportar_csv_prioridade_fiscais,
 )
+from tse_coleta.cli import argumentos_auditoria
 from tse_coleta.cliente import ClienteTSE
 from tse_coleta.integridade import codificar_hash_tse
 
@@ -199,3 +201,19 @@ async def test_executar_auditoria_uf_streaming_e_detecta_anomalias(tmp_path):
     )
     assert csv_out.is_file()
     assert "BELÉM,0033,0004" in csv_out.read_text(encoding="utf-8")
+
+    # Testa consolidação do agregado nacional (br) a partir da UF processada
+    async with ClienteTSE(
+        "https://exemplo.test/",
+        transport=httpx.MockTransport(handler),
+        max_req_por_s=None,
+    ) as c_br:
+        arq_an_br, arq_csv_br = await consolidar_agregado_nacional(c_br, tmp_path, ("pa",))
+    assert arq_an_br.is_file() and arq_csv_br.is_file()
+    an_br = json.loads(arq_an_br.read_text(encoding="utf-8"))
+    assert an_br["uf"] == "BR"
+    assert an_br["totais"]["urnas_completas_ambos_turnos"] == 4
+
+    args_todas = argumentos_auditoria(["--raiz", str(tmp_path), "--uf", "todas"])
+    assert args_todas.agregado_nacional is True
+    assert len(args_todas.ufs_auditoria) == 28

@@ -23,6 +23,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .auditoria_uf import (
+    consolidar_agregado_nacional,
     consolidar_analise_uf,
     executar_auditoria_uf,
     exportar_csv_prioridade_fiscais,
@@ -176,13 +177,23 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
 
+UFS_POR_TAMANHO = (
+    "zz", "rr", "ap", "ac", "to", "ro", "se", "df", "al", "ms", "rn", "am", "mt", "es",
+    "pi", "pb", "go", "sc", "ma", "pa", "pe", "ce", "pr", "rs", "ba", "rj", "mg", "sp",
+)
+
+
 def argumentos_auditoria(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         prog="tse-auditoria",
         description="Auditoria comparativa 1º vs 2º turno por UF em streaming com geração de resumo e relatório HTML/PDF.",
     )
     p.add_argument("--raiz", required=True, type=Path, help="pasta de dados (ex.: /Volumes/240/TSE)")
-    p.add_argument("--uf", required=True, help="sigla da UF (ex.: pa, ac, sp)")
+    p.add_argument(
+        "--uf",
+        required=True,
+        help="sigla da UF (ex.: pa), lista separada por vírgulas (ex.: rr,ap,ac) ou 'todas'",
+    )
     p.add_argument("--conexoes", type=int, default=64)
     p.add_argument(
         "--max-req",
@@ -197,6 +208,11 @@ def argumentos_auditoria(argv: list[str] | None = None) -> argparse.Namespace:
         help="regenera a consolidação e o relatório HTML a partir de resumo_secoes.jsonl já salvo",
     )
     p.add_argument(
+        "--agregado-nacional",
+        action="store_true",
+        help="ao finalizar as UFs solicitadas, gera o relatório consolidado nacional (br)",
+    )
+    p.add_argument(
         "--docs-dir",
         type=Path,
         default=Path("docs/relatorios"),
@@ -204,7 +220,17 @@ def argumentos_auditoria(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument("--sem-caffeinate", action="store_true")
     a = p.parse_args(argv)
-    a.uf = validar("uf", a.uf.strip().lower())
+    uf_arg = a.uf.strip().lower()
+    if uf_arg in ("todas", "all", "br"):
+        a.ufs_auditoria = UFS_POR_TAMANHO
+        a.uf = a.ufs_auditoria[0]
+        a.agregado_nacional = True
+    else:
+        partes = [validar("uf", u.strip().lower()) for u in uf_arg.split(",") if u.strip()]
+        if not partes:
+            p.error("--uf inválida")
+        a.ufs_auditoria = tuple(partes)
+        a.uf = a.ufs_auditoria[0]
     if not 1 <= a.conexoes <= 256:
         p.error("--conexoes deve estar entre 1 e 256")
     if not 0 < a.max_req <= 1000:
@@ -212,46 +238,57 @@ def argumentos_auditoria(argv: list[str] | None = None) -> argparse.Namespace:
     return a
 
 
+def _publicar_artefatos_uf(pasta_uf: Path, uf: str, analise_doc: dict, docs_dir: Path | None) -> Path:
+    arq_analise = pasta_uf / "analise_consolidada.json"
+    arq_html = pasta_uf / f"relatorio_{uf}_1t_2t.html"
+    arq_csv = pasta_uf / f"prioridade_fiscais_{uf}.csv"
+    arq_mes = pasta_uf / "auditoria_mesarios_biometria.json"
+
+    lista_csv = (analise_doc.get("prioridade_fiscais") or {}).pop(
+        "_lista_completa_csv",
+        (analise_doc.get("prioridade_fiscais") or {}).get("lista_ordenada_por_tamanho", []),
+    )
+    if lista_csv and not arq_csv.is_file():
+        exportar_csv_prioridade_fiscais(lista_csv, arq_csv)
+    if not arq_mes.is_file() and "janela_manha_e_mesarios" in analise_doc:
+        arq_mes.write_text(
+            json.dumps(analise_doc["janela_manha_e_mesarios"], ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    gerar_relatorio_html(analise_doc, arq_html)
+    if docs_dir:
+        pasta_docs_uf = docs_dir / uf
+        pasta_docs_uf.mkdir(parents=True, exist_ok=True)
+        for arq in (arq_html, arq_analise, arq_csv, arq_mes):
+            if arq.is_file():
+                shutil.copy2(arq, pasta_docs_uf / arq.name)
+        log.info("relatórios de %s espelhados em %s", uf.upper(), pasta_docs_uf)
+    return arq_html
+
+
 async def principal_auditoria(a: argparse.Namespace) -> int:
     layout = Layout(a.raiz)
     verificar_raiz(a.raiz, a.min_livre_gb)
     trava = travar(layout)  # noqa: F841
     arq_log = configurar_log(layout)
+    ufs_alvo: tuple[str, ...] = getattr(a, "ufs_auditoria", (a.uf,))
     log.info(
-        "início auditoria 1T vs 2T: raiz=%s uf=%s conexoes=%d max_req=%.0f/s log=%s",
+        "início auditoria 1T vs 2T: raiz=%s ufs=%s conexoes=%d max_req=%.0f/s log=%s",
         a.raiz,
-        a.uf.upper(),
+        ",".join(u.upper() for u in ufs_alvo),
         a.conexoes,
         a.max_req,
         arq_log,
     )
 
-    pasta_uf = a.raiz / "auditoria" / a.uf
-    arq_analise = pasta_uf / "analise_consolidada.json"
-    arq_html = pasta_uf / f"relatorio_{a.uf}_1t_2t.html"
-    arq_csv = pasta_uf / f"prioridade_fiscais_{a.uf}.csv"
-
-    def _publicar_em_docs(analise_doc: dict) -> None:
-        lista_csv = (analise_doc.get("prioridade_fiscais") or {}).pop(
-            "_lista_completa_csv",
-            (analise_doc.get("prioridade_fiscais") or {}).get("lista_ordenada_por_tamanho", []),
-        )
-        if lista_csv:
-            exportar_csv_prioridade_fiscais(lista_csv, arq_csv)
-        gerar_relatorio_html(analise_doc, arq_html)
-        if a.docs_dir:
-            pasta_docs_uf = a.docs_dir / a.uf
-            pasta_docs_uf.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(arq_html, pasta_docs_uf / arq_html.name)
-            shutil.copy2(arq_analise, pasta_docs_uf / arq_analise.name)
-            if arq_csv.is_file():
-                shutil.copy2(arq_csv, pasta_docs_uf / arq_csv.name)
-            log.info("relatórios espelhados em %s", pasta_docs_uf)
-
-    if a.apenas_relatorio and arq_analise.is_file():
-        analise = json.loads(arq_analise.read_text(encoding="utf-8"))
-        _publicar_em_docs(analise)
-        log.info("relatório regenerado: %s", arq_html)
+    if a.apenas_relatorio:
+        for uf_atual in ufs_alvo:
+            pasta_uf = a.raiz / "auditoria" / uf_atual
+            arq_analise = pasta_uf / "analise_consolidada.json"
+            if arq_analise.is_file():
+                analise = json.loads(arq_analise.read_text(encoding="utf-8"))
+                arq_html = _publicar_artefatos_uf(pasta_uf, uf_atual, analise, a.docs_dir)
+                log.info("relatório regenerado: %s", arq_html)
         return 0
 
     parar = asyncio.Event()
@@ -260,7 +297,7 @@ async def principal_auditoria(a: argparse.Namespace) -> int:
 
     def ao_sinal():
         if not parar.is_set():
-            log.warning("interrupção recebida: encerrando (o progresso em resumo_secoes.jsonl está salvo)")
+            log.warning("interrupção recebida: encerrando (o progresso em resumo_secoes está salvo)")
             parar.set()
             if tarefa:
                 tarefa.cancel()
@@ -268,39 +305,65 @@ async def principal_auditoria(a: argparse.Namespace) -> int:
     for s in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(s, ao_sinal)
 
-    inicio = datetime.now()
     async with ClienteTSE(concorrencia=a.conexoes, max_req_por_s=a.max_req) as c:
-        def progresso(feitos: int, total: int) -> None:
-            dt = (datetime.now() - inicio).total_seconds() or 1
-            taxa = f"{c.taxa_atual:.0f}" if c.taxa_atual else "sem teto"
-            log.info(
-                "  [%s] %d/%d seções (%.1f%%) — %.0f req/s acumulado; teto vigente %s req/s; pausas %d",
-                a.uf.upper(),
-                feitos,
-                total,
-                100 * feitos / total,
-                c.estatisticas["ok"] / dt,
-                taxa,
-                c.estatisticas["pausas"],
-            )
-            verificar_raiz(a.raiz, a.min_livre_gb)
+        for idx_uf, uf_atual in enumerate(ufs_alvo, start=1):
+            pasta_uf = a.raiz / "auditoria" / uf_atual
+            arq_gz = pasta_uf / "resumo_secoes.jsonl.gz"
+            arq_an_existente = pasta_uf / "analise_consolidada.json"
+            # Se a UF já está 100% concluída com resumo_secoes.jsonl.gz e analise_consolidada.json (ex.: PA), pula
+            if len(ufs_alvo) > 1 and arq_gz.is_file() and arq_an_existente.is_file() and not (pasta_uf / "resumo_secoes.jsonl").is_file():
+                if a.docs_dir and (a.docs_dir / uf_atual / f"relatorio_{uf_atual}_1t_2t.html").is_file():
+                    log.info("[%d/%d] UF %s já concluída e publicada em docs/; pulando", idx_uf, len(ufs_alvo), uf_atual.upper())
+                    continue
+                log.info("[%d/%d] UF %s já concluída em disco; espelhando em docs/", idx_uf, len(ufs_alvo), uf_atual.upper())
+                analise_ex = json.loads(arq_an_existente.read_text(encoding="utf-8"))
+                _publicar_artefatos_uf(pasta_uf, uf_atual, analise_ex, a.docs_dir)
+                continue
 
-        try:
-            arq_gz, arq_an = await executar_auditoria_uf(
-                c,
-                a.raiz,
-                a.uf,
-                trabalhadores=max(160, a.conexoes * 3),
-                progresso=progresso,
-            )
-        except asyncio.CancelledError:
-            log.warning("auditoria interrompida; ao reiniciar, continua exatamente de onde parou")
-            return 130
+            inicio_uf = datetime.now()
+            ok_inicio = c.estatisticas["ok"]
 
-    analise = json.loads(arq_an.read_text(encoding="utf-8"))
-    _publicar_em_docs(analise)
-    log.info("resumo salvo em %s e análise em %s", arq_gz, arq_an)
-    log.info("relatório HTML/PDF gerado em %s", arq_html)
+            def progresso(feitos: int, total: int, _uf: str = uf_atual, _ini: datetime = inicio_uf, _ok0: int = ok_inicio) -> None:
+                dt = (datetime.now() - _ini).total_seconds() or 1
+                taxa = f"{c.taxa_atual:.0f}" if c.taxa_atual else "sem teto"
+                log.info(
+                    "  [%s %d/%d] %d/%d seções (%.1f%%) — %.0f req/s na UF; teto vigente %s req/s; pausas %d",
+                    _uf.upper(),
+                    idx_uf,
+                    len(ufs_alvo),
+                    feitos,
+                    total,
+                    100 * feitos / total,
+                    (c.estatisticas["ok"] - _ok0) / dt,
+                    taxa,
+                    c.estatisticas["pausas"],
+                )
+                verificar_raiz(a.raiz, a.min_livre_gb)
+
+            try:
+                arq_gz, arq_an = await executar_auditoria_uf(
+                    c,
+                    a.raiz,
+                    uf_atual,
+                    trabalhadores=max(160, a.conexoes * 3),
+                    progresso=progresso,
+                )
+            except asyncio.CancelledError:
+                log.warning("auditoria interrompida em %s; ao reiniciar, continua exatamente de onde parou", uf_atual.upper())
+                return 130
+
+            analise = json.loads(arq_an.read_text(encoding="utf-8"))
+            arq_html = _publicar_artefatos_uf(pasta_uf, uf_atual, analise, a.docs_dir)
+            log.info("[%d/%d] UF %s concluída: resumo=%s relatorio=%s", idx_uf, len(ufs_alvo), uf_atual.upper(), arq_gz, arq_html)
+
+        if getattr(a, "agregado_nacional", False):
+            log.info("iniciando consolidação do Agregado Geral Nacional (BR)...")
+            arq_an_br, _ = await consolidar_agregado_nacional(c, a.raiz, UFS_POR_TAMANHO)
+            pasta_br = a.raiz / "auditoria" / "br"
+            analise_br = json.loads(arq_an_br.read_text(encoding="utf-8"))
+            arq_html_br = _publicar_artefatos_uf(pasta_br, "br", analise_br, a.docs_dir)
+            log.info("Agregado Geral Nacional (BR) concluído: %s", arq_html_br)
+
     log.info("fim. estatísticas HTTP: %s", dict(c.estatisticas))
     return 0
 
