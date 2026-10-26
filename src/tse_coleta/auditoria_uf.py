@@ -15,6 +15,7 @@ Fluxo por seção:
 from __future__ import annotations
 
 import asyncio
+import csv
 import gzip
 import json
 import logging
@@ -540,6 +541,132 @@ def _hms_encerramento(iso: str) -> str:
         if len(t) >= 6:
             return f"{t[0:2]}:{t[2:4]}:{t[4:6]}"
     return ""
+
+
+async def enriquecer_logs_mesarios_secoes_criticas(
+    cliente: ClienteTSE,
+    registros: list[dict],
+    *,
+    limiar_sem_bio: float = 25.0,
+    trabalhadores: int = 48,
+) -> int:
+    """Baixa em RAM os `log.jez` das seções com alta liberação sem biometria para extrair os títulos dos mesários."""
+    alvos = [
+        r
+        for r in registros
+        if r.get("completa_2t")
+        and (
+            r.get("pct_sem_bio_2t", 0.0) >= limiar_sem_bio
+            or r.get("delta_sem_bio_pp", 0.0) >= 15.0
+        )
+        and "mesarios_habilitadores" not in r.get("log_2t", {})
+    ]
+    if not alvos:
+        return 0
+
+    log.info("enriquecendo auditoria nominal de mesários em %d seções críticas...", len(alvos))
+    fila: asyncio.Queue[dict] = asyncio.Queue()
+    for r in alvos:
+        fila.put_nowait(r)
+
+    enriquecidas = 0
+    trava = asyncio.Lock()
+
+    async def trab() -> None:
+        nonlocal enriquecidas
+        while not fila.empty():
+            try:
+                r = fila.get_nowait()
+            except asyncio.QueueEmpty:
+                return
+            uf = r["uf"].lower()
+            sec_id = IdSecao(uf, r["municipio"], r["zona"], r["secao"])
+            cam_2t = Caminhos(CICLO_2026, PLEITO_2T)
+            hash_2t = r.get("hash_2t", "")
+            nome_log_2t = f"o{PLEITO_2T.zfill(5)}{uf}{sec_id.municipio}{sec_id.zona}{sec_id.secao}-log.jez"
+            if not hash_2t:
+                continue
+            bruto = await cliente.obter(cam_2t.arquivo_urna(sec_id, hash_2t, nome_log_2t))
+            if not bruto:
+                aux_2t = await _obter_aux(cliente, cam_2t, sec_id)
+                if aux_2t and aux_2t.versoes:
+                    v2 = aux_2t.versoes[0]
+                    nm = v2.arquivos.get("log", "")
+                    if nm:
+                        bruto = await cliente.obter(cam_2t.arquivo_urna(sec_id, v2.hash_hex, nm))
+            if bruto:
+                try:
+                    logs = analisar_log_por_datas(bruto, (DATA_1T, DATA_2T), uf=uf)
+                    r["log_2t"] = logs[DATA_2T].para_dict()
+                    if logs[DATA_1T].votos_computados == r.get("comp_1t"):
+                        r["log_1t"] = logs[DATA_1T].para_dict()
+                    async with trava:
+                        enriquecidas += 1
+                except ErroAnaliseLog:
+                    pass
+            del bruto
+
+    await asyncio.gather(*(trab() for _ in range(min(trabalhadores, len(alvos)))))
+    log.info("enriquecidas %d/%d seções críticas com dados nominais de mesários", enriquecidas, len(alvos))
+    return enriquecidas
+
+
+def exportar_csv_prioridade_fiscais(itens: list[dict], destino_csv: Path) -> Path:
+    """Exporta o catálogo completo ordenado por tamanho da seção (`aptos_2t` decrescente) para envio de fiscais."""
+    destino_csv.parent.mkdir(parents=True, exist_ok=True)
+    campos = [
+        "prioridade_ordem",
+        "municipio",
+        "zona",
+        "secao",
+        "local_votacao",
+        "aptos_2t",
+        "comp_1t",
+        "pct_comp_1t",
+        "comp_2t",
+        "pct_comp_2t",
+        "delta_comp_pp",
+        "sem_bio_2t",
+        "pct_sem_bio_2t",
+        "mesario_lider_id",
+        "mesario_lider_habilitacoes",
+        "votos_13_1t",
+        "votos_13_2t",
+        "votos_22_1t",
+        "votos_22_2t",
+        "score_atipicidade",
+        "motivos_fiscalizacao",
+    ]
+    with open(destino_csv, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=campos)
+        w.writeheader()
+        for idx, x in enumerate(itens, 1):
+            w.writerow(
+                {
+                    "prioridade_ordem": idx,
+                    "municipio": x.get("nome_municipio", ""),
+                    "zona": x.get("zona", ""),
+                    "secao": x.get("secao", ""),
+                    "local_votacao": x.get("local", ""),
+                    "aptos_2t": x.get("aptos_2t", 0),
+                    "comp_1t": x.get("comp_1t", 0),
+                    "pct_comp_1t": x.get("pct_comp_1t", 0.0),
+                    "comp_2t": x.get("comp_2t", 0),
+                    "pct_comp_2t": x.get("pct_comp_2t", 0.0),
+                    "delta_comp_pp": x.get("delta_comp_pp", 0.0),
+                    "sem_bio_2t": x.get("sem_bio_2t", 0),
+                    "pct_sem_bio_2t": x.get("pct_sem_bio_2t", 0.0),
+                    "mesario_lider_id": x.get("mesario_lider_id", ""),
+                    "mesario_lider_habilitacoes": x.get("mesario_lider_qtd", 0),
+                    "votos_13_1t": x.get("v13_1t", 0),
+                    "votos_13_2t": x.get("v13_2t", 0),
+                    "votos_22_1t": x.get("v22_1t", 0),
+                    "votos_22_2t": x.get("v22_2t", 0),
+                    "score_atipicidade": x.get("score", 0.0),
+                    "motivos_fiscalizacao": " | ".join(x.get("motivos", [])),
+                }
+            )
+    return destino_csv
 
 
 def consolidar_analise_uf(
@@ -1112,6 +1239,325 @@ def consolidar_analise_uf(
     )
     dossie_secoes_criticas.sort(key=lambda x: x["score"], reverse=True)
 
+    # --- 11. Radiografia Completa das Seções onde o Comparecimento SUBIU (Item 1) ---
+    faixas_subida_ordem = [
+        ("0,01 a +2,0 p.p.", 0.0, 2.0),
+        ("+2,0 a +5,0 p.p.", 2.0, 5.0),
+        ("+5,0 a +10,0 p.p.", 5.0, 10.0),
+        ("+10,0 a +15,0 p.p.", 10.0, 15.0),
+        (">= +15,0 p.p.", 15.0, 999.0),
+    ]
+    faixas_subida_dados = {
+        nome: {"faixa": nome, "secoes": 0, "delta_eleitores": 0, "delta_13": 0, "delta_22": 0, "v13_2t": 0, "v22_2t": 0}
+        for nome, _, _ in faixas_subida_ordem
+    }
+    todas_subiram: list[dict] = []
+    for r in completas_ambos:
+        dpp = r["delta_comp_pp"]
+        if dpp <= 0.0:
+            continue
+        p1_nom = (r.get("pres_1t") or {}).get("nominais") or {}
+        p2_nom = (r.get("pres_2t") or {}).get("nominais") or {}
+        v13_1, v22_1 = int(p1_nom.get("13", 0)), int(p1_nom.get("22", 0))
+        v13_2, v22_2 = int(p2_nom.get("13", 0)), int(p2_nom.get("22", 0))
+        d13 = v13_2 - v13_1
+        d22 = v22_2 - v22_1
+        med_mun, dp_mun = media_delta_mun.get(r["municipio"], (0.0, 2.5))
+        z_mun = round((dpp - med_mun) / dp_mun, 2)
+        item_sub = {
+            "chave": r["chave"],
+            "nome_municipio": r["nome_municipio"],
+            "zona": r["zona"],
+            "secao": r["secao"],
+            "local": r["local"],
+            "aptos_2t": r["aptos_2t"],
+            "comp_1t": r["comp_1t"],
+            "pct_comp_1t": r["pct_comp_1t"],
+            "comp_2t": r["comp_2t"],
+            "pct_comp_2t": r["pct_comp_2t"],
+            "delta_comp_abs": r["delta_comp_abs"],
+            "delta_comp_pp": dpp,
+            "z_municipio": z_mun,
+            "pct_sem_bio_2t": r["pct_sem_bio_2t"],
+            "v13_1t": v13_1,
+            "v13_2t": v13_2,
+            "delta_13": d13,
+            "v22_1t": v22_1,
+            "v22_2t": v22_2,
+            "delta_22": d22,
+        }
+        todas_subiram.append(item_sub)
+        for nome, ini, fim in faixas_subida_ordem:
+            if (ini < dpp <= fim) or (ini == 15.0 and dpp > 15.0):
+                b = faixas_subida_dados[nome]
+                b["secoes"] += 1
+                b["delta_eleitores"] += r["delta_comp_abs"]
+                b["delta_13"] += d13
+                b["delta_22"] += d22
+                b["v13_2t"] += v13_2
+                b["v22_2t"] += v22_2
+                break
+
+    subiram_por_pp = sorted(todas_subiram, key=lambda x: (x["delta_comp_pp"], x["delta_comp_abs"]), reverse=True)
+    subiram_por_abs = sorted(todas_subiram, key=lambda x: (x["delta_comp_abs"], x["delta_comp_pp"]), reverse=True)
+
+    subida_comparecimento = {
+        "total_secoes_subiram": len(todas_subiram),
+        "soma_delta_eleitores": sum(x["delta_comp_abs"] for x in todas_subiram),
+        "soma_delta_13": sum(x["delta_13"] for x in todas_subiram),
+        "soma_delta_22": sum(x["delta_22"] for x in todas_subiram),
+        "faixas": [faixas_subida_dados[n] for n, _, _ in faixas_subida_ordem],
+        "top_por_pp": subiram_por_pp[:200],
+        "top_por_votos_absolutos": subiram_por_abs[:150],
+    }
+
+    # --- 12. Janela da Manhã (08h-11h) e Auditoria Nominal de Mesários no Log (Item 3) ---
+    votos_08_11_1t = sum(int(curva_horaria_1t.get(h, 0)) for h in ("08", "09", "10"))
+    votos_08_11_2t = sum(int(curva_horaria_2t.get(h, 0)) for h in ("08", "09", "10"))
+    votos_11_17_1t = sum(int(curva_horaria_1t.get(h, 0)) for h in ("11", "12", "13", "14", "15", "16"))
+    votos_11_17_2t = sum(int(curva_horaria_2t.get(h, 0)) for h in ("11", "12", "13", "14", "15", "16"))
+
+    faixas_manha_spec = [
+        ("<= 0 votos", -9999, 0),
+        ("+1 a +40 votos", 1, 40),
+        ("+41 a +80 votos", 41, 80),
+        ("+81 a +120 votos", 81, 120),
+        ("> +120 votos", 121, 9999),
+    ]
+    faixas_manha_dados = {
+        n: {"faixa": n, "secoes": 0, "delta_manha": 0, "v13_1t": 0, "v13_2t": 0, "v22_1t": 0, "v22_2t": 0, "sem_bio_2t": 0, "comp_2t": 0}
+        for n, _, _ in faixas_manha_spec
+    }
+    secoes_salto_manha: list[dict] = []
+    curva_manuais_1t: Counter[str] = Counter()
+    curva_manuais_2t: Counter[str] = Counter()
+    secoes_auditoria_mesarios: list[dict] = []
+    ranking_mesarios: list[dict] = []
+    total_digital_nao_assoc_2t = 0
+    secoes_digital_nao_assoc_2t = 0
+    mapa_mesario_lider: dict[str, tuple[str, int, int]] = {}
+
+    for r in completas_ambos:
+        l1 = r["log_1t"]
+        l2 = r["log_2t"]
+        vh1 = l1.get("votos_por_hora") or {}
+        vh2 = l2.get("votos_por_hora") or {}
+        m1 = sum(int(vh1.get(h, 0)) for h in ("08", "09", "10"))
+        m2 = sum(int(vh2.get(h, 0)) for h in ("08", "09", "10"))
+        dm = m2 - m1
+
+        p1_nom = (r.get("pres_1t") or {}).get("nominais") or {}
+        p2_nom = (r.get("pres_2t") or {}).get("nominais") or {}
+        v13_1, v22_1 = int(p1_nom.get("13", 0)), int(p1_nom.get("22", 0))
+        v13_2, v22_2 = int(p2_nom.get("13", 0)), int(p2_nom.get("22", 0))
+        pct_13_2 = round(100.0 * v13_2 / (v13_2 + v22_2), 2) if (v13_2 + v22_2) > 0 else 0.0
+        pct_22_2 = round(100.0 * v22_2 / (v13_2 + v22_2), 2) if (v13_2 + v22_2) > 0 else 0.0
+
+        for n, ini, fim in faixas_manha_spec:
+            if ini <= dm <= fim:
+                bm = faixas_manha_dados[n]
+                bm["secoes"] += 1
+                bm["delta_manha"] += dm
+                bm["v13_1t"] += v13_1
+                bm["v13_2t"] += v13_2
+                bm["v22_1t"] += v22_1
+                bm["v22_2t"] += v22_2
+                bm["sem_bio_2t"] += r["sem_bio_2t"]
+                bm["comp_2t"] += r["comp_2t"]
+                break
+
+        if dm >= 80:
+            secoes_salto_manha.append(
+                {
+                    "chave": r["chave"],
+                    "nome_municipio": r["nome_municipio"],
+                    "zona": r["zona"],
+                    "secao": r["secao"],
+                    "local": r["local"],
+                    "votos_08_11_1t": m1,
+                    "votos_08_11_2t": m2,
+                    "delta_08_11": dm,
+                    "comp_2t": r["comp_2t"],
+                    "pct_sem_bio_2t": r["pct_sem_bio_2t"],
+                    "v13_1t": v13_1,
+                    "v13_2t": v13_2,
+                    "v22_1t": v22_1,
+                    "v22_2t": v22_2,
+                    "pct_13_2t": pct_13_2,
+                    "pct_22_2t": pct_22_2,
+                }
+            )
+
+        for h, qtd in (l1.get("manuais_por_hora") or {}).items():
+            curva_manuais_1t[h] += int(qtd)
+        for h, qtd in (l2.get("manuais_por_hora") or {}).items():
+            curva_manuais_2t[h] += int(qtd)
+
+        mes_hab_2t = l2.get("mesarios_habilitadores") or {}
+        mes_manha_2t = l2.get("mesarios_manha_08_11") or {}
+        mes_hab_1t = l1.get("mesarios_habilitadores") or {}
+        dig_nao_assoc = int(l2.get("digital_nao_associada_mesario", 0))
+        if dig_nao_assoc > 0:
+            total_digital_nao_assoc_2t += dig_nao_assoc
+            secoes_digital_nao_assoc_2t += 1
+
+        lider_id = ""
+        lider_qtd = 0
+        lider_manha_qtd = 0
+        if mes_hab_2t:
+            lider_id, lider_qtd = max(mes_hab_2t.items(), key=lambda kv: kv[1])
+            lider_manha_qtd = int(mes_manha_2t.get(lider_id, 0))
+            mapa_mesario_lider[r["chave"]] = (lider_id, int(lider_qtd), lider_manha_qtd)
+            for mid, mqtd in mes_hab_2t.items():
+                ranking_mesarios.append(
+                    {
+                        "id_mesario": mid,
+                        "chave": r["chave"],
+                        "nome_municipio": r["nome_municipio"],
+                        "zona": r["zona"],
+                        "secao": r["secao"],
+                        "local": r["local"],
+                        "habilitacoes_2t": int(mqtd),
+                        "habilitacoes_manha_2t": int(mes_manha_2t.get(mid, 0)),
+                        "habilitacoes_1t": int(mes_hab_1t.get(mid, 0)),
+                        "comp_2t": r["comp_2t"],
+                        "sem_bio_2t": r["sem_bio_2t"],
+                        "pct_sem_bio_2t": r["pct_sem_bio_2t"],
+                        "v13_2t": v13_2,
+                        "v22_2t": v22_2,
+                        "pct_13_2t": pct_13_2,
+                        "pct_22_2t": pct_22_2,
+                    }
+                )
+
+        if "fotos_apresentadas" in l2 and (
+            r["pct_sem_bio_2t"] >= 25.0 or r["delta_sem_bio_pp"] >= 15.0
+        ):
+            man_h2 = l2.get("manuais_por_hora") or {}
+            man_08_11 = sum(int(man_h2.get(h, 0)) for h in ("08", "09", "10"))
+            sol_man = int(l2.get("solicitacoes_dado_manual", 0))
+            secoes_auditoria_mesarios.append(
+                {
+                    "chave": r["chave"],
+                    "nome_municipio": r["nome_municipio"],
+                    "zona": r["zona"],
+                    "secao": r["secao"],
+                    "local": r["local"],
+                    "comp_2t": r["comp_2t"],
+                    "sem_bio_2t": r["sem_bio_2t"],
+                    "pct_sem_bio_1t": r["pct_sem_bio_1t"],
+                    "pct_sem_bio_2t": r["pct_sem_bio_2t"],
+                    "fotos_apresentadas_2t": int(l2.get("fotos_apresentadas", 0)),
+                    "solicitacoes_dado_manual_2t": sol_man,
+                    "manuais_08_11_2t": man_08_11,
+                    "pct_manuais_manha_2t": round(100.0 * man_08_11 / sol_man, 1) if sol_man > 0 else 0.0,
+                    "mesario_lider_id": lider_id,
+                    "mesario_lider_qtd": int(lider_qtd),
+                    "mesario_lider_manha_qtd": lider_manha_qtd,
+                    "qtd_mesarios_distintos": len(mes_hab_2t),
+                    "digital_nao_associada_mesario": dig_nao_assoc,
+                    "gerou_relatorio_biografico": bool(l2.get("gerou_relatorio_habilitados_biograficamente")),
+                    "v13_2t": v13_2,
+                    "v22_2t": v22_2,
+                    "pct_13_2t": pct_13_2,
+                    "pct_22_2t": pct_22_2,
+                }
+            )
+
+    secoes_salto_manha.sort(key=lambda x: x["delta_08_11"], reverse=True)
+    secoes_auditoria_mesarios.sort(key=lambda x: (x["pct_sem_bio_2t"], x["sem_bio_2t"]), reverse=True)
+    ranking_mesarios.sort(key=lambda x: (x["habilitacoes_2t"], x["pct_sem_bio_2t"]), reverse=True)
+
+    faixas_manha_resumo = []
+    for n, _, _ in faixas_manha_spec:
+        bm = faixas_manha_dados[n]
+        tot_v2 = bm["v13_2t"] + bm["v22_2t"]
+        faixas_manha_resumo.append(
+            {
+                "faixa": n,
+                "secoes": bm["secoes"],
+                "delta_manha": bm["delta_manha"],
+                "delta_13": bm["v13_2t"] - bm["v13_1t"],
+                "delta_22": bm["v22_2t"] - bm["v22_1t"],
+                "pct_13_2t": round(100.0 * bm["v13_2t"] / tot_v2, 2) if tot_v2 > 0 else 0.0,
+                "pct_22_2t": round(100.0 * bm["v22_2t"] / tot_v2, 2) if tot_v2 > 0 else 0.0,
+                "pct_sem_bio_2t": round(100.0 * bm["sem_bio_2t"] / bm["comp_2t"], 2) if bm["comp_2t"] > 0 else 0.0,
+            }
+        )
+
+    janela_manha_e_mesarios = {
+        "votos_08_11_1t": votos_08_11_1t,
+        "votos_08_11_2t": votos_08_11_2t,
+        "delta_votos_08_11": votos_08_11_2t - votos_08_11_1t,
+        "pct_crescimento_08_11": round(100.0 * (votos_08_11_2t - votos_08_11_1t) / votos_08_11_1t, 2)
+        if votos_08_11_1t > 0
+        else 0.0,
+        "votos_11_17_1t": votos_11_17_1t,
+        "votos_11_17_2t": votos_11_17_2t,
+        "delta_votos_11_17": votos_11_17_2t - votos_11_17_1t,
+        "pct_crescimento_11_17": round(100.0 * (votos_11_17_2t - votos_11_17_1t) / votos_11_17_1t, 2)
+        if votos_11_17_1t > 0
+        else 0.0,
+        "faixas_salto_manha": faixas_manha_resumo,
+        "top_salto_manha_secoes": secoes_salto_manha[:120],
+        "curva_horaria_manuais_1t": dict(sorted(curva_manuais_1t.items())),
+        "curva_horaria_manuais_2t": dict(sorted(curva_manuais_2t.items())),
+        "secoes_auditoria_mesarios": secoes_auditoria_mesarios[:200],
+        "ranking_mesarios": ranking_mesarios[:120],
+        "total_alertas_digital_nao_associada_2t": total_digital_nao_assoc_2t,
+        "secoes_com_digital_nao_associada_2t": secoes_digital_nao_assoc_2t,
+    }
+
+    # --- 13. Catálogo de Prioridade para Envio de Fiscais (Ordenado por Tamanho `aptos_2t` Decrescente - Item 2) ---
+    mapa_reg = {r["chave"]: r for r in completas_ambos}
+    prioridade_fiscais_lista: list[dict] = []
+    for d in dossie_secoes_criticas:
+        r = mapa_reg[d["chave"]]
+        tem_motivo_campo = (
+            r["pct_sem_bio_2t"] >= 25.0
+            or r["delta_comp_pp"] >= 6.0
+            or r["pct_comp_2t"] >= 90.0
+            or r["pct_comp_1t"] >= 92.0
+            or abs(d["v13_2t"] - d["v13_1t"]) >= 25
+            or d["score"] >= 22.0
+        )
+        if not tem_motivo_campo:
+            continue
+        lid_id, lid_qtd, lid_m_qtd = mapa_mesario_lider.get(d["chave"], ("", 0, 0))
+        prioridade_fiscais_lista.append(
+            {
+                **d,
+                "comp_1t": r["comp_1t"],
+                "comp_2t": r["comp_2t"],
+                "sem_bio_2t": r["sem_bio_2t"],
+                "mesario_lider_id": lid_id,
+                "mesario_lider_qtd": lid_qtd,
+                "mesario_lider_manha_qtd": lid_m_qtd,
+            }
+        )
+    prioridade_fiscais_lista.sort(key=lambda x: (x["aptos_2t"], x["comp_2t"], x["score"]), reverse=True)
+
+    prioridade_fiscais = {
+        "total_secoes_prioritarias": len(prioridade_fiscais_lista),
+        "lista_ordenada_por_tamanho": prioridade_fiscais_lista,
+    }
+
+    # --- 14. Detalhamento das Mudanças de Eleitores Aptos entre 1º e 2º Turno (Item 4) ---
+    dist_aptos: Counter[int] = Counter(x["delta_aptos"] for x in aptos_alterados)
+    quedas_aptos = sorted([x for x in aptos_alterados if x["delta_aptos"] < 0], key=lambda x: x["delta_aptos"])
+    aumentos_aptos = sorted([x for x in aptos_alterados if x["delta_aptos"] > 0], key=lambda x: x["delta_aptos"], reverse=True)
+    detalhe_aptos_alterados = {
+        "total_secoes_alteradas": len(aptos_alterados),
+        "saldo_liquido_aptos": aptos_2t_tot - aptos_1t_tot,
+        "secoes_com_aumento": len(aumentos_aptos),
+        "soma_aumentos": sum(x["delta_aptos"] for x in aumentos_aptos),
+        "secoes_com_reducao": len(quedas_aptos),
+        "soma_reducoes": sum(x["delta_aptos"] for x in quedas_aptos),
+        "distribuicao_delta": {f"{k:+d}": dist_aptos[k] for k in sorted(dist_aptos)},
+        "maiores_quedas": quedas_aptos[:80],
+        "maiores_aumentos": aumentos_aptos[:60],
+    }
+
     return {
         "uf": uf.upper(),
         "gerado_em": datetime.now().astimezone().isoformat(timespec="seconds"),
@@ -1217,4 +1663,12 @@ def consolidar_analise_uf(
             "scatter_migracao": pontos_scatter_migracao[:2500],
             "scatter_biometria": pontos_scatter_biometria[:2500],
         },
+        "subida_comparecimento": subida_comparecimento,
+        "janela_manha_e_mesarios": janela_manha_e_mesarios,
+        "prioridade_fiscais": {
+            "total_secoes_prioritarias": prioridade_fiscais["total_secoes_prioritarias"],
+            "lista_ordenada_por_tamanho": prioridade_fiscais["lista_ordenada_por_tamanho"][:300],
+            "_lista_completa_csv": prioridade_fiscais["lista_ordenada_por_tamanho"],
+        },
+        "detalhe_aptos_alterados": detalhe_aptos_alterados,
     }

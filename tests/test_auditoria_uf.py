@@ -6,7 +6,12 @@ import httpx
 
 from test_analisador_log import construir_log_jez
 from test_decodificador_bu import construir_bu_sintetico
-from tse_coleta.auditoria_uf import consolidar_analise_uf, executar_auditoria_uf
+from tse_coleta.auditoria_uf import (
+    consolidar_analise_uf,
+    enriquecer_logs_mesarios_secoes_criticas,
+    executar_auditoria_uf,
+    exportar_csv_prioridade_fiscais,
+)
 from tse_coleta.cliente import ClienteTSE
 from tse_coleta.integridade import codificar_hash_tse
 
@@ -183,3 +188,14 @@ async def test_executar_auditoria_uf_streaming_e_detecta_anomalias(tmp_path):
     assert cont["alta_sem_biometria"] >= 1
     assert cont["outliers_mesma_escola"] >= 1
     assert analise["anomalias"]["dossie_secoes_criticas"][0]["chave"] == f"{uf}-{mun}-{zona}-0004"
+    assert analise["subida_comparecimento"]["total_secoes_subiram"] == 1
+    assert "janela_manha_e_mesarios" in analise
+    assert "prioridade_fiscais" in analise
+    assert "detalhe_aptos_alterados" in analise
+
+    csv_out = exportar_csv_prioridade_fiscais(
+        analise["prioridade_fiscais"]["lista_ordenada_por_tamanho"],
+        tmp_path / "prioridade_fiscais_pa.csv",
+    )
+    assert csv_out.is_file()
+    assert "BELÉM,0033,0004" in csv_out.read_text(encoding="utf-8")

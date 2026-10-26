@@ -27,3 +27,14 @@ Comparar seção por seção o 1º turno (`pleito 3220`, 04/10/2026) com o 2º t
 8. **Hardware, Troca de Urna e Relógio:** mudança de `numeroInternoUrna` entre 1T e 2T, contingência, reinicializações durante a votação e regressões de relógio no log.
 9. **Imutabilidade do 1º Turno (05/10 vs. Hoje):** comparação dos hashes atuais do 1T contra o snapshot imutável de 05/10/2026.
 10. **Batimento Soma dos BUs vs. Resultado Oficial (`-u.json`):** conferência matemática voto a voto contra o JSON agregado oficial do TSE.
+
+---
+
+## 5. Expansão `v2` do Relatório (Sem Alterar a `v1`)
+
+11. **Radiografia das Seções que Subiram o Comparecimento (1T $\rightarrow$ 2T):** gráfico por faixas de aumento e tabela expandida mostrando o ganho de votos por candidato nas seções onde o comparecimento aumentou.
+12. **Catálogo de Prioridade para Envio de Fiscais (Ordem Decrescente por Tamanho da Seção `aptos_2t`):** tabela HTML e arquivo `prioridade_fiscais_<uf>.csv` ordenados pelas maiores seções com anomalias.
+13. **Foco na Explosão da Manhã (`08h00–10h59`), Auditoria Nominal de Mesários (`log.jez`) e Fundamentação Jurídica/Pericial:**
+    - Extração no `logd.dat` de `Foto do eleitor apresentada`, solicitações manuais por hora (`08h..17h`), títulos de mesários que habilitaram eleitores (`Mesário <12_digitos> habilitou o eleitor`), alertas de digital não associada a mesário e geração da fita `[ELEITORES HABILITADOS BIOGRAFICAMENTE]`.
+    - Guia jurídico e pericial para requerimento de preservação e amostragem dos Cadernos de Votação, fitas impressas e confronto grafotécnico/papiloscópico com o Sistema ELO.
+14. **Detalhamento Técnico e Estatístico das Mudanças de Eleitores Aptos (`aptos_1t != aptos_2t`):** distribuição das variações (`-21` a `+4`), explicação das causas operacionais (Transferência Temporária de Eleitores vs. baixas no ELO) e listagem das maiores variações por seção.

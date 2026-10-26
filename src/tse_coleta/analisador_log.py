@@ -56,6 +56,13 @@ class ResumoLogTurno:
     teclas_indevidas: int = 0
     reinicios_durante_votacao: int = 0
     regressoes_relogio: int = 0
+    fotos_apresentadas: int = 0
+    solicitacoes_dado_manual: int = 0
+    manuais_por_hora: dict[str, int] = field(default_factory=dict)
+    mesarios_habilitadores: dict[str, int] = field(default_factory=dict)
+    mesarios_manha_08_11: dict[str, int] = field(default_factory=dict)
+    digital_nao_associada_mesario: int = 0
+    gerou_relatorio_habilitados_biograficamente: bool = False
 
     def para_dict(self) -> dict:
         return asdict(self)
@@ -174,6 +181,13 @@ def analisar_texto_logd(
         teclas_indevidas = 0
         reinicios_votacao = 0
         regressoes_relogio = 0
+        fotos_apresentadas = 0
+        solicitacoes_dado_manual = 0
+        tempos_manuais: list[int] = []
+        mesarios_hab: Counter[str] = Counter()
+        eventos_mesario: list[tuple[int, str]] = []
+        digital_nao_assoc = 0
+        gerou_rel_biografico = False
 
         for linha in linhas:
             partes = linha.split("\t")
@@ -208,6 +222,21 @@ def analisar_texto_logd(
                 ultimo_habilitado_s = None
             elif "Tipo de habilitação do eleitor [biométrica]" in msg:
                 habilitacoes_bio += 1
+            elif "Foto do eleitor apresentada" in msg:
+                fotos_apresentadas += 1
+            elif "Solicitação de dado pessoal do eleitor para habilitação manual" in msg:
+                solicitacoes_dado_manual += 1
+                tempos_manuais.append(seg)
+            elif msg.startswith("Mesário ") and " habilitou o eleitor" in msg:
+                partes_m = msg.split()
+                if len(partes_m) >= 2:
+                    id_mes = partes_m[1]
+                    mesarios_hab[id_mes] += 1
+                    eventos_mesario.append((seg, id_mes))
+            elif "Não é possível associar a habilitação a um mesário" in msg:
+                digital_nao_assoc += 1
+            elif "ELEITORES HABILITADOS BIOGRAFICAMENTE" in msg:
+                gerou_rel_biografico = True
             elif "Número de tentativas de reconhecimento do dedo" in msg:
                 falhas_digital += 1
             elif "Tecla indevida pressionada" in msg:
@@ -234,6 +263,19 @@ def analisar_texto_logd(
         votos_apos_17h = 0
         por_hora: Counter[str] = Counter()
         apos_17h_min: Counter[str] = Counter()
+        manuais_hora: Counter[str] = Counter()
+        mesarios_manha: Counter[str] = Counter()
+
+        for seg in tempos_manuais:
+            seg_brt = seg + deslocamento_brt
+            h_brt = max(0, min(23, seg_brt // 3600))
+            manuais_hora[f"{h_brt:02d}"] += 1
+
+        for seg, id_mes in eventos_mesario:
+            seg_brt = seg + deslocamento_brt
+            h_brt = max(0, min(23, seg_brt // 3600))
+            if 8 <= h_brt <= 10:
+                mesarios_manha[id_mes] += 1
 
         for seg in tempos_voto:
             seg_brt = seg + deslocamento_brt
@@ -296,6 +338,13 @@ def analisar_texto_logd(
             teclas_indevidas=teclas_indevidas,
             reinicios_durante_votacao=reinicios_votacao,
             regressoes_relogio=regressoes_relogio,
+            fotos_apresentadas=fotos_apresentadas,
+            solicitacoes_dado_manual=solicitacoes_dado_manual,
+            manuais_por_hora=dict(sorted(manuais_hora.items())),
+            mesarios_habilitadores=dict(mesarios_hab.most_common()),
+            mesarios_manha_08_11=dict(mesarios_manha.most_common()),
+            digital_nao_associada_mesario=digital_nao_assoc,
+            gerou_relatorio_habilitados_biograficamente=gerou_rel_biografico,
         )
 
     return resultado

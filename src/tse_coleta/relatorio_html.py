@@ -398,6 +398,10 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
     anom = analise.get("anomalias", {})
     cont = anom.get("contagens", {})
     graf = analise.get("graficos", {})
+    subida = analise.get("subida_comparecimento") or {}
+    manha = analise.get("janela_manha_e_mesarios") or {}
+    fiscais = analise.get("prioridade_fiscais") or {}
+    det_aptos = analise.get("detalhe_aptos_alterados") or {}
 
     # Gráficos SVG
     svg_comp = _svg_scatter_comparecimento(graf.get("scatter_comparecimento", []))
@@ -456,6 +460,45 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         titulo_y="Nº de Urnas por Mediana",
         cor_1="#4f46e5",
         cor_2="#059669",
+    )
+
+    faixas_sub = subida.get("faixas") or []
+    rot_sub = [str(f.get("faixa", "")) for f in faixas_sub] or ["0 a +2", "+2 a +5", "+5 a +10", "+10 a +15", ">= +15"]
+    s13_sub = [max(0, int(f.get("delta_13", 0))) for f in faixas_sub] or [0] * 5
+    s22_sub = [max(0, int(f.get("delta_22", 0))) for f in faixas_sub] or [0] * 5
+    svg_subida_faixas = _svg_barras_duplas(
+        rot_sub,
+        s13_sub,
+        s22_sub,
+        titulo_y="Ganho Líquido de Votos (2ºT − 1ºT)",
+        legenda_1="Ganho Candidato 13",
+        legenda_2="Ganho Candidato 22",
+        cor_1="#dc2626",
+        cor_2="#2563eb",
+    )
+
+    horas_man = [f"{h:02d}" for h in range(8, 18)]
+    cm1 = manha.get("curva_horaria_manuais_1t") or {}
+    cm2 = manha.get("curva_horaria_manuais_2t") or {}
+    svg_manuais_hora = _svg_barras_duplas(
+        [f"{h}h" for h in horas_man],
+        [int(cm1.get(h, 0)) for h in horas_man],
+        [int(cm2.get(h, 0)) for h in horas_man],
+        titulo_y="Liberações Sem Biometria / Hora",
+        legenda_1="1º Turno (Manuais)",
+        legenda_2="2º Turno (Manuais)",
+        cor_1="#64748b",
+        cor_2="#7c3aed",
+    )
+
+    dist_ap_map = det_aptos.get("distribuicao_delta") or {}
+    rot_ap = list(dist_ap_map.keys()) if dist_ap_map else ["-2", "-1", "+1", "+2"]
+    val_ap = [int(dist_ap_map.get(k, 0)) for k in rot_ap] if dist_ap_map else [0, 0, 0, 0]
+    svg_dist_aptos = _svg_barras_simples(
+        rot_ap[:14],
+        val_ap[:14],
+        titulo_y="Nº de Seções com Variação",
+        cor="#b45309",
     )
 
     # Batimento soma dos BUs vs Oficial TSE
@@ -626,6 +669,164 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
                 f"<td class=\"num-alert\">{x['score']:.1f}</td>"
                 f"<td>1T: {_fmt_pct(x['pct_comp_1t'], 1)}<br />2T: <strong>{_fmt_pct(x['pct_comp_2t'], 1)}</strong> ({x['delta_comp_pp']:+.1f} p.p.)</td>"
                 f"<td>13: {_fmt_int(x['v13_1t'])}→{_fmt_int(x['v13_2t'])}<br />22: {_fmt_int(x['v22_1t'])}→{_fmt_int(x['v22_2t'])}</td>"
+                f"<td class=\"motivos-cell\">{motivos_html}</td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_faixas_subida(itens: list[dict]) -> str:
+        if not itens:
+            return '<tr><td colspan="6" class="empty-cell">Sem dados de faixas de subida.</td></tr>'
+        out = []
+        for x in itens:
+            d13 = int(x.get("delta_13", 0))
+            d22 = int(x.get("delta_22", 0))
+            razao = f"{d13 / d22:.2f}x pró-13" if d22 > 0 else ("100% pró-13" if d13 > 0 else "-")
+            out.append(
+                f"<tr>"
+                f"<td><strong>{_esc(x['faixa'])}</strong></td>"
+                f"<td>{_fmt_int(x['secoes'])}</td>"
+                f"<td>+{_fmt_int(x['delta_eleitores'])}</td>"
+                f"<td class=\"num-alert\">{d13:+d} ({_fmt_int(d13)})</td>"
+                f"<td>{d22:+d} ({_fmt_int(d22)})</td>"
+                f"<td><strong>{_esc(razao)}</strong></td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_subida_expandida(itens: list[dict], limite: int = 80) -> str:
+        if not itens:
+            return '<tr><td colspan="9" class="empty-cell">Nenhuma seção com aumento de comparecimento.</td></tr>'
+        out = []
+        for idx, x in enumerate(itens[:limite], 1):
+            out.append(
+                f"<tr>"
+                f"<td>{idx}</td>"
+                f"<td><strong>{_esc(x['nome_municipio'])}</strong></td>"
+                f"<td>{_esc(x['zona'])} / {_esc(x['secao'])} (Loc. {_esc(x.get('local', '-'))})</td>"
+                f"<td>{_fmt_int(x['aptos_2t'])}</td>"
+                f"<td>{_fmt_int(x['comp_1t'])} ({_fmt_pct(x['pct_comp_1t'], 1)})</td>"
+                f"<td><strong>{_fmt_int(x['comp_2t'])} ({_fmt_pct(x['pct_comp_2t'], 1)})</strong></td>"
+                f"<td class=\"num-alert\">+{x['delta_comp_pp']:.2f} p.p. (+{_fmt_int(x['delta_comp_abs'])})</td>"
+                f"<td>{_fmt_int(x['v13_1t'])}→<strong>{_fmt_int(x['v13_2t'])}</strong> ({x.get('delta_13', x['v13_2t'] - x['v13_1t']):+d})</td>"
+                f"<td>{_fmt_int(x['v22_1t'])}→<strong>{_fmt_int(x['v22_2t'])}</strong> ({x.get('delta_22', x['v22_2t'] - x['v22_1t']):+d})</td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_faixas_manha(itens: list[dict]) -> str:
+        if not itens:
+            return '<tr><td colspan="7" class="empty-cell">Sem dados de faixas da manhã.</td></tr>'
+        out = []
+        for x in itens:
+            out.append(
+                f"<tr>"
+                f"<td><strong>{_esc(x['faixa'])}</strong></td>"
+                f"<td>{_fmt_int(x['secoes'])}</td>"
+                f"<td>{_fmt_int(x['delta_manha'])}</td>"
+                f"<td>{_fmt_int(x['delta_13'])}</td>"
+                f"<td>{_fmt_int(x['delta_22'])}</td>"
+                f"<td><strong>{_fmt_pct(x['pct_13_2t'])}</strong> vs. {_fmt_pct(x['pct_22_2t'])}</td>"
+                f"<td>{_fmt_pct(x['pct_sem_bio_2t'])}</td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_salto_manha_secoes(itens: list[dict]) -> str:
+        if not itens:
+            return '<tr><td colspan="8" class="empty-cell">Nenhuma seção com salto acentuado na manhã.</td></tr>'
+        out = []
+        for x in itens[:50]:
+            out.append(
+                f"<tr>"
+                f"<td><strong>{_esc(x['nome_municipio'])}</strong></td>"
+                f"<td>{_esc(x['zona'])} / {_esc(x['secao'])}</td>"
+                f"<td>{_fmt_int(x['votos_08_11_1t'])}</td>"
+                f"<td><strong>{_fmt_int(x['votos_08_11_2t'])}</strong></td>"
+                f"<td class=\"num-alert\">+{_fmt_int(x['delta_08_11'])} votos</td>"
+                f"<td>{_fmt_pct(x['pct_sem_bio_2t'], 1)}</td>"
+                f"<td>{_fmt_int(x['v13_2t'])} ({_fmt_pct(x['pct_13_2t'], 1)})</td>"
+                f"<td>{_fmt_int(x['v22_2t'])} ({_fmt_pct(x['pct_22_2t'], 1)})</td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_ranking_mesarios(itens: list[dict]) -> str:
+        if not itens:
+            return '<tr><td colspan="8" class="empty-cell">Nenhum registro nominal de mesário extraído.</td></tr>'
+        out = []
+        for idx, x in enumerate(itens[:60], 1):
+            out.append(
+                f"<tr>"
+                f"<td>{idx}</td>"
+                f"<td><code><strong>{_esc(x['id_mesario'])}</strong></code></td>"
+                f"<td><strong>{_esc(x['nome_municipio'])}</strong> (Z:{_esc(x['zona'])} S:{_esc(x['secao'])})</td>"
+                f"<td class=\"num-alert\">{_fmt_int(x['habilitacoes_2t'])} hab.</td>"
+                f"<td>{_fmt_int(x['habilitacoes_manha_2t'])} (08h–11h)</td>"
+                f"<td>{_fmt_int(x['habilitacoes_1t'])} hab.</td>"
+                f"<td>{_fmt_pct(x['pct_sem_bio_2t'], 1)} ({_fmt_int(x['sem_bio_2t'])}/{_fmt_int(x['comp_2t'])})</td>"
+                f"<td>13: {_fmt_pct(x['pct_13_2t'], 1)} | 22: {_fmt_pct(x['pct_22_2t'], 1)}</td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_auditoria_mesarios_secao(itens: list[dict]) -> str:
+        if not itens:
+            return '<tr><td colspan="9" class="empty-cell">Nenhuma seção com auditoria nominal de mesários.</td></tr>'
+        out = []
+        for x in itens[:60]:
+            lid = f"{x['mesario_lider_id']} ({x['mesario_lider_qtd']}x)" if x.get("mesario_lider_id") else "-"
+            alerta_dig = int(x.get("digital_nao_associada_mesario", 0))
+            out.append(
+                f"<tr>"
+                f"<td><strong>{_esc(x['nome_municipio'])}</strong></td>"
+                f"<td>{_esc(x['zona'])} / {_esc(x['secao'])}</td>"
+                f"<td>{_fmt_int(x['comp_2t'])}</td>"
+                f"<td>{_fmt_int(x['fotos_apresentadas_2t'])}</td>"
+                f"<td class=\"num-alert\">{_fmt_int(x['solicitacoes_dado_manual_2t'])} ({_fmt_pct(x['pct_sem_bio_2t'], 1)})</td>"
+                f"<td>{_fmt_int(x['manuais_08_11_2t'])} ({_fmt_pct(x['pct_manuais_manha_2t'], 1)})</td>"
+                f"<td><code>{_esc(lid)}</code></td>"
+                f"<td class=\"{'num-alert' if alerta_dig > 0 else ''}\">{_fmt_int(alerta_dig)}</td>"
+                f"<td>13: {_fmt_pct(x['pct_13_2t'], 1)} | 22: {_fmt_pct(x['pct_22_2t'], 1)}</td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_aptos_var(itens: list[dict]) -> str:
+        if not itens:
+            return '<tr><td colspan="6" class="empty-cell">Nenhuma seção com alteração de eleitores aptos.</td></tr>'
+        out = []
+        for x in itens[:45]:
+            d_ap = int(x.get("delta_aptos", 0))
+            out.append(
+                f"<tr>"
+                f"<td><strong>{_esc(x['nome_municipio'])}</strong></td>"
+                f"<td>{_esc(x['zona'])} / {_esc(x['secao'])}</td>"
+                f"<td>{_fmt_int(x['aptos_1t'])}</td>"
+                f"<td>{_fmt_int(x['aptos_2t'])}</td>"
+                f"<td class=\"num-alert\">{d_ap:+d} eleitores</td>"
+                f"<td>{'Redução entre turnos (baixa ELO / TTE)' if d_ap < 0 else 'Aumento entre turnos (recepção TTE)'}</td>"
+                f"</tr>"
+            )
+        return "".join(out)
+
+    def _linhas_fiscais_prioridade(itens: list[dict]) -> str:
+        if not itens:
+            return '<tr><td colspan="9" class="empty-cell">Nenhuma seção prioritária catalogada.</td></tr>'
+        out = []
+        for idx, x in enumerate(itens[:180], 1):
+            motivos_html = "<br />".join(f"• {_esc(m)}" for m in x.get("motivos", []))
+            lid = f"{x['mesario_lider_id']} ({x['mesario_lider_qtd']}x)" if x.get("mesario_lider_id") else "-"
+            out.append(
+                f"<tr>"
+                f"<td><strong>#{idx}</strong></td>"
+                f"<td><strong>{_esc(x['nome_municipio'])}</strong></td>"
+                f"<td>Z:{_esc(x['zona'])} / S:{_esc(x['secao'])}<br /><span class=\"muted\">Local {_esc(x['local'])}</span></td>"
+                f"<td class=\"num-alert\">{_fmt_int(x['aptos_2t'])} aptos</td>"
+                f"<td>1T: {_fmt_pct(x['pct_comp_1t'], 1)}<br />2T: <strong>{_fmt_pct(x['pct_comp_2t'], 1)}</strong> ({x['delta_comp_pp']:+.1f} p.p.)</td>"
+                f"<td>{_fmt_pct(x['pct_sem_bio_2t'], 1)}<br /><span class=\"muted\">Mesário: {_esc(lid)}</span></td>"
+                f"<td>13: {_fmt_int(x['v13_1t'])}→{_fmt_int(x['v13_2t'])}<br />22: {_fmt_int(x['v22_1t'])}→{_fmt_int(x['v22_2t'])}</td>"
+                f"<td>{x['score']:.1f}</td>"
                 f"<td class=\"motivos-cell\">{motivos_html}</td>"
                 f"</tr>"
             )
@@ -1014,6 +1215,51 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
           <tbody>{_linhas_comp_100(anom.get('comparecimento_100_ou_acima', []))}</tbody>
         </table>
       </div>
+
+      <h3>2.4. Radiografia Completa de Todas as {_fmt_int(subida.get('total_secoes_subiram'))} Seções Onde o Comparecimento Subiu no 2º Turno</h3>
+      <div class="explain-box">
+        <strong>Análise do universo completo das seções que subiram o comparecimento:</strong> Enquanto o estado teve variação geral de
+        <strong>{tot.get('delta_comparecimento_pp', 0.0):+.2f} p.p.</strong>, em exatamente <strong>{_fmt_int(subida.get('total_secoes_subiram'))} seções</strong>
+        o comparecimento do 2º turno superou o do 1º turno (somando <strong>+{_fmt_int(subida.get('soma_delta_eleitores'))} novos votantes</strong> nessas urnas).
+        Nessas seções onde houve subida de comparecimento, o <strong>Candidato 13 ganhou +{_fmt_int(subida.get('soma_delta_13'))} votos líquidos</strong> contra
+        <strong>+{_fmt_int(subida.get('soma_delta_22'))} votos líquidos para o Candidato 22</strong>.
+      </div>
+      {_bloco_grafico(svg_subida_faixas)}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Faixa de Aumento (2ºT − 1ºT)</th>
+              <th>Qtd. de Seções</th>
+              <th>Eleitores a Mais na Urna</th>
+              <th>Ganho Líquido Cand. 13</th>
+              <th>Ganho Líquido Cand. 22</th>
+              <th>Proporção de Ganho</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_faixas_subida(subida.get('faixas', []))}</tbody>
+        </table>
+      </div>
+
+      <h3>2.5. Listagem Expandida das Seções que Mais Subiram em Votos Absolutos (Top 80 por Volume de Novos Eleitores)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Município</th>
+              <th>Zona / Seção (Local)</th>
+              <th>Aptos</th>
+              <th>Comparecimento 1ºT</th>
+              <th>Comparecimento 2ºT</th>
+              <th>Aumento (p.p. e Eleitores)</th>
+              <th>Cand. 13 (1ºT → 2ºT)</th>
+              <th>Cand. 22 (1ºT → 2ºT)</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_subida_expandida(subida.get('top_por_votos_absolutos', []), 80)}</tbody>
+        </table>
+      </div>
     </div>
 
     <div class="section-card">
@@ -1077,6 +1323,51 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
           <tbody>{_linhas_pos17h(pos17.get('top_urnas', []))}</tbody>
         </table>
       </div>
+
+      <h3>3.4. Investigação Especial: A Explosão de Votos na Manhã (08h00 às 10h59 — 1ºT vs. 2ºT)</h3>
+      <div class="warn-box">
+        <strong>A maior mudança horária da eleição aconteceu entre 08h00 e 10h59 da manhã:</strong>
+        No 1º turno, foram computados <strong>{_fmt_int(manha.get('votos_08_11_1t'))} votos</strong> entre 08h00 e 10h59.
+        No 2º turno, na mesma janela das 08h00 às 10h59, foram computados <strong>{_fmt_int(manha.get('votos_08_11_2t'))} votos</strong>
+        — um salto de <strong>+{_fmt_int(manha.get('delta_votos_08_11'))} votos na manhã ({manha.get('pct_crescimento_08_11', 0.0):+.2f}%)</strong>,
+        enquanto no período das 11h00 às 16h59 o volume caiu de {_fmt_int(manha.get('votos_11_17_1t'))} para {_fmt_int(manha.get('votos_11_17_2t'))}
+        ({manha.get('pct_crescimento_11_17', 0.0):+.2f}%). Abaixo cruzamos o salto de votos na manhã com a votação de cada candidato e com a taxa de liberação manual sem biometria.
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Faixa de Salto na Manhã (08h–11h: 2ºT − 1ºT)</th>
+              <th>Nº de Seções</th>
+              <th>Saldo de Votos na Manhã</th>
+              <th>Ganho Líquido Cand. 13</th>
+              <th>Ganho Líquido Cand. 22</th>
+              <th>Placar no 2ºT (13 vs. 22)</th>
+              <th>% Sem Biometria (2ºT)</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_faixas_manha(manha.get('faixas_salto_manha', []))}</tbody>
+        </table>
+      </div>
+
+      <h3>3.5. Seções com Maior Explosão de Votos entre 08h00 e 10h59 da Manhã</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Município</th>
+              <th>Zona / Seção</th>
+              <th>Votos 08h–11h (1ºT)</th>
+              <th>Votos 08h–11h (2ºT)</th>
+              <th>Salto na Manhã</th>
+              <th>% Sem Biometria 2ºT</th>
+              <th>Cand. 13 (2ºT)</th>
+              <th>Cand. 22 (2ºT)</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_salto_manha_secoes(manha.get('top_salto_manha_secoes', []))}</tbody>
+        </table>
+      </div>
     </div>
 
     <div class="section-card">
@@ -1131,6 +1422,70 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
           </thead>
           <tbody>{_linhas_biometria(anom.get('alta_sem_biometria', []))}</tbody>
         </table>
+      </div>
+
+      <h3>5.2. Curva Horária das Liberações Manuais Sem Biometria e Auditoria Nominal de Mesários no Log (<code>log.jez</code>)</h3>
+      <div class="explain-box">
+        <strong>Rastro Forense Descoberto Dentro do <code>log.jez</code>:</strong> Ao inspecionar os eventos internos de <code>logd.dat</code> nas seções críticas de alta
+        liberação manual, constatamos que a urna eletrônica registra:
+        (1) <code>"Foto do eleitor apresentada"</code> — comprovando que o eleitor possuía cadastro biométrico com fotografia na tela do terminal do mesário;
+        (2) as 4 falhas seguidas de leitura de digital (<code>Tentativa [1] de [4]</code> a <code>[4] de [4]</code>);
+        (3) <code>"Solicitação de dado pessoal do eleitor para habilitação manual"</code> (digitação do ano de nascimento);
+        (4) <code>"Mesário &lt;NÚMERO_DO_TÍTULO&gt; habilitou o eleitor"</code> — identificando nominalmente o título eleitoral de 12 dígitos do mesário que colocou o próprio dedo para liberar cada voto sem biometria; e
+        (5) o alerta de anomalia: <code>"Digital coletada bate com uma digital gravada após o registro inicial de mesário. Não é possível associar a habilitação a um mesário."</code>
+        ({_fmt_int(manha.get('total_alertas_digital_nao_associada_2t'))} ocorrências em {_fmt_int(manha.get('secoes_com_digital_nao_associada_2t'))} seções críticas no 2ºT).
+      </div>
+      {_bloco_grafico(svg_manuais_hora)}
+
+      <h3>5.3. Ranking Estadual dos Títulos de Mesários que Mais Liberaram Eleitores Sem Biometria no 2º Turno</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Título do Mesário (Log)</th>
+              <th>Município (Zona / Seção)</th>
+              <th>Habilitações Manuais no 2ºT</th>
+              <th>Feitas na Manhã (08h–11h)</th>
+              <th>No 1º Turno</th>
+              <th>% Sem Biometria da Seção</th>
+              <th>Placar 2ºT na Seção</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_ranking_mesarios(manha.get('ranking_mesarios', []))}</tbody>
+        </table>
+      </div>
+
+      <h3>5.4. Radiografia Forense por Seção: Fotos Apresentadas × Habilitações por Mesário × Digital Não Associada</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Município</th>
+              <th>Zona / Seção</th>
+              <th>Votantes 2ºT</th>
+              <th>Fotos na Tela (<code>log.jez</code>)</th>
+              <th>Liberações Manuais (%)</th>
+              <th>Manuais entre 08h–11h</th>
+              <th>Mesário Líder (Título / Qtd)</th>
+              <th>Digital Não Assoc. a Mesário</th>
+              <th>Placar 2ºT</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_auditoria_mesarios_secao(manha.get('secoes_auditoria_mesarios', []))}</tbody>
+        </table>
+      </div>
+
+      <h3>5.5. Fundamentação Legal e Roteiro Prático para Auditoria Física de Assinaturas e Impressões Digitais (Partido Político / PL)</h3>
+      <div class="warn-box">
+        <strong>O que a legislação exige em CADA voto liberado sem biometria (Código Eleitoral, art. 146; Lei nº 9.504/1997, art. 66; Res.-TSE nº 23.673/2021 e nº 23.736/2024):</strong>
+        <br />1. <strong>Obrigatoriedade de Documento Oficial com Foto e Assinatura no Caderno de Votação:</strong> Quando o eleitor é habilitado sem reconhecimento biométrico na urna, ele é obrigado a exibir documento oficial com foto e <strong>assinar fisicamente o Caderno de Votação</strong> (ou, se analfabeto/impossibilitado, apor a <strong>impressão digital do polegar com tinta</strong>).
+        <br />2. <strong>Existência da Fita Impressa <code>[ELEITORES HABILITADOS BIOGRAFICAMENTE]</code>:</strong> Às 17h00, logo após imprimir os Boletins de Urna, a urna imprime na bobina de papel uma fita específica listando os eleitores habilitados manualmente sem biometria naquela seção.
+        <br />3. <strong>Equação de Auditoria Forense (Prova Material Direta):</strong> Se o <code>bu.dat</code> e o <code>log.jez</code> de uma seção registram, por exemplo, <strong>105 a 173 eleitores habilitados sem biometria</strong>, o Caderno de Votação físico daquela seção (guardado no Cartório da respectiva Zona Eleitoral) <strong>tem obrigatoriamente de conter 105 a 173 assinaturas manuscritas ou polegares entintados</strong>.
+        <br />4. <strong>Roteiro de Requerimento pelo Partido (PL) para Perícia por Amostragem:</strong>
+        <br />• <strong>Petição Cautelar de Preservação e Exibição Documental</strong> perante o Juízo Eleitoral das Zonas listadas na Tabela 5.4 / Corregedoria Regional Eleitoral (TRE), instruída com os hashes oficiais SHA-512 desta auditoria (afastando qualquer alegação de pedido genérico);
+        <br />• <strong>Confronto Quantitativo:</strong> Contagem física das assinaturas/polegares no Caderno de Votação e na fita <code>[ELEITORES HABILITADOS BIOGRAFICAMENTE]</code> contra o número exato de liberações manuais cravadas pelo mesário no <code>log.jez</code>;
+        <br />• <strong>Perícia Grafotécnica e Confronto com o Sistema ELO:</strong> Verificação de assinaturas feitas por um mesmo punho gráfico (mesma caligrafia em série) e batimento por amostragem das assinaturas do Caderno de Votação com a ficha cadastral/assinatura original do eleitor no <strong>Sistema ELO</strong> e registros de óbito/ausência (arts. 309 e 312 do Código Eleitoral — votar ou tentar votar mais de uma vez ou em lugar de outrem).
       </div>
     </div>
 
@@ -1211,6 +1566,49 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
           <div class="kpi-sub">Troca física entre turnos, contingência ou reinício</div>
         </div>
       </div>
+
+      <h3>8.1. Por Que o Número de Eleitores Aptos Mudou Entre o 1º e o 2º Turno em {_fmt_int(det_aptos.get('total_secoes_alteradas'))} Seções?</h3>
+      <div class="explain-box">
+        <strong>Explicação Técnica do Sistema ELO / GEDAI-UE:</strong> Embora o cadastro eleitoral geral feche 150 dias antes do pleito (Lei nº 9.504/1997, art. 91),
+        entre o 1º turno (04/10/2026) e o 2º turno (25/10/2026) ocorrem dois fenômenos no sistema da Justiça Eleitoral quando as mídias de carga das urnas são geradas para o 2º turno:
+        <br />1. <strong>Transferência Temporária de Eleitores (TTE) entre o 1º e o 2º Turno:</strong> Mesários, convocados da Justiça Eleitoral, militares, policiais e agentes de segurança pública podem habilitar ou alterar pedidos de Transferência Temporária especificamente para o 2º turno. Isso gera variações de <strong>+1 ou +2 aptos</strong> na seção de destino ({_fmt_int(det_aptos.get('secoes_com_aumento'))} seções somaram <strong>+{_fmt_int(det_aptos.get('soma_aumentos'))} aptos</strong>) e de <strong>−1 ou −2 aptos</strong> na seção de origem.
+        <br />2. <strong>Cancelamentos por Óbito, Suspensão de Direitos Políticos e Decisões Judiciais no Sistema ELO:</strong> Como {_fmt_int(det_aptos.get('secoes_com_reducao'))} seções perderam um total de <strong>{_fmt_int(det_aptos.get('soma_reducoes'))} aptos</strong>, o saldo líquido estadual não é zero: houve redução líquida de <strong>{_fmt_int(det_aptos.get('saldo_liquido_aptos'))} eleitores aptos</strong> entre os dois turnos ({_fmt_int(tot.get('aptos_1t'))} no 1ºT → {_fmt_int(tot.get('aptos_2t'))} no 2ºT). Seções com perdas acentuadas (−5 a −21 aptos) estão listadas abaixo para conferência das atas de carga.
+      </div>
+      {_bloco_grafico(svg_dist_aptos)}
+
+      <h3>8.2. Seções com as Maiores Reduções de Eleitores Aptos do 1º para o 2º Turno</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Município</th>
+              <th>Zona / Seção</th>
+              <th>Eleitores Aptos no 1ºT</th>
+              <th>Eleitores Aptos no 2ºT</th>
+              <th>Diferença (2ºT − 1ºT)</th>
+              <th>Natureza Técnica da Variação</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_aptos_var(det_aptos.get('maiores_quedas', []))}</tbody>
+        </table>
+      </div>
+
+      <h3>8.3. Seções com os Maiores Aumentos de Eleitores Aptos do 1º para o 2º Turno</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Município</th>
+              <th>Zona / Seção</th>
+              <th>Eleitores Aptos no 1ºT</th>
+              <th>Eleitores Aptos no 2ºT</th>
+              <th>Diferença (2ºT − 1ºT)</th>
+              <th>Natureza Técnica da Variação</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_aptos_var(det_aptos.get('maiores_aumentos', []))}</tbody>
+        </table>
+      </div>
     </div>
 
     <div class="section-card">
@@ -1233,6 +1631,35 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
             </tr>
           </thead>
           <tbody>{_linhas_dossie(anom.get('dossie_secoes_criticas', []))}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h2>10. Catálogo de Prioridade para Envio de Fiscais no Próximo Pleito — Ordem Decrescente por Tamanho da Seção ({_fmt_int(fiscais.get('total_secoes_prioritarias'))} seções catalogadas)</h2>
+      <div class="explain-box">
+        <strong>Critério Operacional de Fiscalização Partidária:</strong> Para maximizar o impacto da fiscalização presencial no próximo pleito,
+        todas as seções que apresentaram anomalias relevantes (alta liberação sem biometria pelo mesário, salto de comparecimento, presença ≥ 90%–100%,
+        perda líquida de votos ou desvio em relação às demais salas da mesma escola) foram ordenadas abaixo de forma <strong>decrescente pelo tamanho do colégio eleitoral da seção (<code>aptos_2t</code>)</strong>.
+        Assim, as maiores urnas (400 a 500 eleitores) encabeçam a lista de prioridade para alocação obrigatória de fiscais de seção.
+        O catálogo integral também foi exportado em planilha CSV (<code>prioridade_fiscais_{_esc(uf.lower())}.csv</code>).
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Prioridade</th>
+              <th>Município</th>
+              <th>Zona / Seção / Local</th>
+              <th>Tamanho (Aptos)</th>
+              <th>Comparecimento (1ºT → 2ºT)</th>
+              <th>% Sem Biometria / Mesário</th>
+              <th>Votos (1ºT → 2ºT)</th>
+              <th>Score</th>
+              <th>Alertas para Atenção do Fiscal na Mesa</th>
+            </tr>
+          </thead>
+          <tbody>{_linhas_fiscais_prioridade(fiscais.get('lista_ordenada_por_tamanho', []))}</tbody>
         </table>
       </div>
     </div>

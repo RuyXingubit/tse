@@ -95,3 +95,27 @@ def test_log_jez_com_contingencia_aninhada_soma_sem_duplicar():
     assert res.votos_computados == 3
     assert res.ids_urna == ["01111111", "02222222"]
     assert res.trocou_urna_no_dia is True
+
+
+def test_extrai_auditoria_nominal_de_mesarios_e_habilitacao_manual():
+    linhas = [
+        "25/10/2026 08:15:00\tINFO\t01793135\tVOTA\tFoto do eleitor apresentada\tA1",
+        "25/10/2026 08:15:10\tINFO\t01793135\tVOTA\tSolicitação de dado pessoal do eleitor para habilitação manual\tA2",
+        "25/10/2026 08:15:20\tINFO\t01793135\tVOTA\tMesário 046716651333 habilitou o eleitor\tA3",
+        "25/10/2026 08:15:22\tINFO\t01793135\tVOTA\tEleitor foi habilitado\tA4",
+        "25/10/2026 08:15:35\tINFO\t01793135\tVOTA\tO voto do eleitor foi computado\tA5",
+        "25/10/2026 14:20:00\tINFO\t01793135\tVOTA\tFoto do eleitor apresentada\tB1",
+        "25/10/2026 14:20:10\tINFO\t01793135\tVOTA\tSolicitação de dado pessoal do eleitor para habilitação manual\tB2",
+        "25/10/2026 14:20:20\tINFO\t01793135\tVOTA\tDigital coletada bate com uma digital gravada após o registro inicial de mesário. Não é possível associar a habilitação a um mesário.\tB3",
+        "25/10/2026 14:20:22\tINFO\t01793135\tVOTA\tEleitor foi habilitado\tB4",
+        "25/10/2026 14:20:35\tINFO\t01793135\tVOTA\tO voto do eleitor foi computado\tB5",
+        "25/10/2026 17:01:00\tINFO\t01793135\tVOTA\tGerando relatório [ELEITORES HABILITADOS BIOGRAFICAMENTE] [INÍCIO]\tC1",
+    ]
+    res = analisar_log_por_datas(construir_log_jez(linhas), ("25/10/2026",), uf="pa")["25/10/2026"]
+    assert res.fotos_apresentadas == 2
+    assert res.solicitacoes_dado_manual == 2
+    assert res.manuais_por_hora == {"08": 1, "14": 1}
+    assert res.mesarios_habilitadores == {"046716651333": 1}
+    assert res.mesarios_manha_08_11 == {"046716651333": 1}
+    assert res.digital_nao_associada_mesario == 1
+    assert res.gerou_relatorio_habilitados_biograficamente is True
