@@ -1075,7 +1075,7 @@ def consolidar_analise_uf(
                     "m": r["nome_municipio"],
                     "x": r["pct_comp_1t"],
                     "y": r["pct_comp_2t"],
-                    "a": 1 if eh_destaque else 0,
+                    "a": 1 if (r["delta_comp_pp"] >= 10.0 or r["pct_comp_2t"] >= 99.0) else 0,
                 }
             )
             pontos_scatter_migracao.append(

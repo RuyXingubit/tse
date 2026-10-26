@@ -34,16 +34,8 @@ def _rodape_svg(w: int, h: int) -> str:
 
 
 def _bloco_grafico(svg: str) -> str:
-    """Envolve um gráfico SVG com legenda de autoria e fonte visível na tela e no PDF."""
-    return (
-        f'<div class="chart-wrap">'
-        f"{svg}"
-        f'<div class="chart-credit">'
-        f"<strong>Autor:</strong> {_esc(AUTOR_RELATORIO)} &#160;|&#160; "
-        f"<strong>Fonte dos dados:</strong> {_esc(FONTE_DADOS_CURTA)}"
-        f"</div>"
-        f"</div>"
-    )
+    """Envolve um gráfico SVG (que já traz a autoria e a fonte embutidas na imagem)."""
+    return f'<div class="chart-wrap">{svg}</div>'
 
 
 def _fmt_int(n: int | float | None) -> str:
@@ -96,12 +88,13 @@ def _svg_scatter_comparecimento(pontos: list[dict]) -> str:
     normais = []
     alertas = []
     for p in pontos:
-        x = cx(float(p["x"]))
-        y = cy(float(p["y"]))
+        vx, vy = float(p["x"]), float(p["y"])
+        x = cx(vx)
+        y = cy(vy)
         titulo = _esc(f"{p['m']} ({p['c']}): 1T={p['x']}% -> 2T={p['y']}%")
-        if p.get("a"):
+        if (vy - vx) >= 10.0 or vy >= 99.0:
             alertas.append(
-                f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.4" fill="#dc2626" fill-opacity="0.82"><title>{titulo}</title></circle>'
+                f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.6" fill="#dc2626" fill-opacity="0.88"><title>{titulo}</title></circle>'
             )
         else:
             normais.append(
