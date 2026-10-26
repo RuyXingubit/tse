@@ -90,6 +90,17 @@ def test_gerar_relatorio_html_xhtml_valido_com_print_pdf(tmp_path):
     assert "@media print" in texto
     assert "BELÉM" in texto
     assert "<svg" in texto
+    assert "Ruy França" in texto
+    assert "print-running-footer" in texto
+    assert "author-banner" in texto
+    assert "report-footer" in texto
     # Confere que o documento é também XML/XHTML bem-formado (após remover a linha DOCTYPE)
     xml_body = "\n".join(texto.splitlines()[1:])
-    ET.fromstring(xml_body)
+    root = ET.fromstring(xml_body)
+    ns = {"xhtml": "http://www.w3.org/1999/xhtml"}
+    svgs = root.findall(".//xhtml:svg", ns)
+    assert len(svgs) == 7
+    for svg in svgs:
+        svg_str = ET.tostring(svg, encoding="unicode")
+        assert "Ruy França" in svg_str
+        assert "resultados.tse.jus.br" in svg_str

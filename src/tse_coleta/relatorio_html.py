@@ -7,9 +7,43 @@ from __future__ import annotations
 import html
 from pathlib import Path
 
+AUTOR_RELATORIO = "Ruy França"
+FONTE_DADOS_CURTA = (
+    "Dados Públicos Oficiais do TSE (resultados.tse.jus.br — BU, Log da Urna e VSC — Eleições 2026)"
+)
+FONTE_DADOS_COMPLETA = (
+    "Tribunal Superior Eleitoral (TSE) — Repositório Oficial de Dados Brutos de Urna "
+    "(https://resultados.tse.jus.br/oficial/ele2026/) — Pleitos 3220 (1º Turno, 04/10/2026) e "
+    "3221 (2º Turno, 25/10/2026): Boletins de Urna (-bu.dat), Logs de Urna (-log.jez) e "
+    "Pacotes de Assinatura (-vota.vsc) validados por SHA-256 e SHA-512."
+)
+
 
 def _esc(val: object) -> str:
     return html.escape(str(val), quote=True)
+
+
+def _rodape_svg(w: int, h: int) -> str:
+    """Injeta a assinatura de autoria e fonte dos dados diretamente dentro de cada imagem SVG."""
+    texto = f"Autor: {AUTOR_RELATORIO}  |  Fonte dos dados: {FONTE_DADOS_CURTA}"
+    return (
+        f'<line x1="16" y1="{h - 24}" x2="{w - 16}" y2="{h - 24}" stroke="#e2e8f0" stroke-width="1" />'
+        f'<text x="{w / 2:.1f}" y="{h - 9}" text-anchor="middle" font-size="10" font-weight="600" fill="#334155">'
+        f"{_esc(texto)}</text>"
+    )
+
+
+def _bloco_grafico(svg: str) -> str:
+    """Envolve um gráfico SVG com legenda de autoria e fonte visível na tela e no PDF."""
+    return (
+        f'<div class="chart-wrap">'
+        f"{svg}"
+        f'<div class="chart-credit">'
+        f"<strong>Autor:</strong> {_esc(AUTOR_RELATORIO)} &#160;|&#160; "
+        f"<strong>Fonte dos dados:</strong> {_esc(FONTE_DADOS_CURTA)}"
+        f"</div>"
+        f"</div>"
+    )
 
 
 def _fmt_int(n: int | float | None) -> str:
@@ -25,8 +59,8 @@ def _fmt_pct(v: float | None, casas: int = 2) -> str:
 
 
 def _svg_scatter_comparecimento(pontos: list[dict]) -> str:
-    w, h = 680, 420
-    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 48
+    w, h = 680, 448
+    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 76
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
 
@@ -82,15 +116,16 @@ def _svg_scatter_comparecimento(pontos: list[dict]) -> str:
         + diag_mais10
         + "".join(normais)
         + "".join(alertas)
-        + f'<text x="{pad_l + pw / 2:.1f}" y="{h - 8}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">Comparecimento no 1º Turno (%)</text>'
+        + f'<text x="{pad_l + pw / 2:.1f}" y="{h - 34}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">Comparecimento no 1º Turno (%)</text>'
         + f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">Comparecimento no 2º Turno (%)</text>'
+        + _rodape_svg(w, h)
         + "</svg>"
     )
 
 
 def _svg_scatter_migracao(pontos: list[dict]) -> str:
-    w, h = 680, 420
-    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 48
+    w, h = 680, 448
+    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 76
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
 
@@ -153,15 +188,16 @@ def _svg_scatter_migracao(pontos: list[dict]) -> str:
         + eixos
         + "".join(normais)
         + "".join(alertas)
-        + f'<text x="{pad_l + pw / 2:.1f}" y="{h - 8}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">Variação de Votos do Candidato 13 (2ºT − 1ºT)</text>'
+        + f'<text x="{pad_l + pw / 2:.1f}" y="{h - 34}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">Variação de Votos do Candidato 13 (2ºT − 1ºT)</text>'
         + f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">Variação de Votos do Candidato 22 (2ºT − 1ºT)</text>'
+        + _rodape_svg(w, h)
         + "</svg>"
     )
 
 
 def _svg_scatter_biometria(pontos: list[dict]) -> str:
-    w, h = 680, 400
-    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 48
+    w, h = 680, 428
+    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 76
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
 
@@ -214,8 +250,9 @@ def _svg_scatter_biometria(pontos: list[dict]) -> str:
         + "".join(grades)
         + "".join(normais)
         + "".join(alertas)
-        + f'<text x="{pad_l + pw / 2:.1f}" y="{h - 8}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">Eleitores Liberados Sem Biometria no 2º Turno (%)</text>'
+        + f'<text x="{pad_l + pw / 2:.1f}" y="{h - 34}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">Eleitores Liberados Sem Biometria no 2º Turno (%)</text>'
         + f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">Comparecimento no 2º Turno (%)</text>'
+        + _rodape_svg(w, h)
         + "</svg>"
     )
 
@@ -231,8 +268,8 @@ def _svg_barras_duplas(
     cor_1: str = "#2563eb",
     cor_2: str = "#dc2626",
 ) -> str:
-    w, h = 680, 340
-    pad_l, pad_r, pad_t, pad_b = 64, 20, 36, 56
+    w, h = 680, 368
+    pad_l, pad_r, pad_t, pad_b = 64, 20, 36, 84
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
     n = max(1, len(rotulos))
@@ -270,13 +307,14 @@ def _svg_barras_duplas(
                 f'<text x="{x_centro:.1f}" y="{pad_t + ph + 18}" text-anchor="middle" font-size="10" fill="#334155">{_esc(rot)}</text>'
             )
 
-    # Legenda no topo
+    # Legenda no topo + rodapé de autoria e fonte
     elementos.append(
         f'<rect x="{pad_l}" y="8" width="12" height="12" fill="{cor_1}" rx="2" />'
         f'<text x="{pad_l + 18}" y="18" font-size="11.5" font-weight="600" fill="#1e293b">{_esc(legenda_1)}</text>'
         f'<rect x="{pad_l + 170}" y="8" width="12" height="12" fill="{cor_2}" rx="2" />'
         f'<text x="{pad_l + 188}" y="18" font-size="11.5" font-weight="600" fill="#1e293b">{_esc(legenda_2)}</text>'
         f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">{_esc(titulo_y)}</text>'
+        + _rodape_svg(w, h)
     )
     return f'<svg viewBox="0 0 {w} {h}" class="svg-chart" role="img">' + "".join(elementos) + "</svg>"
 
@@ -284,8 +322,8 @@ def _svg_barras_duplas(
 def _svg_barras_simples(
     rotulos: list[str], valores: list[int], *, titulo_y: str, cor: str = "#0284c7"
 ) -> str:
-    w, h = 680, 310
-    pad_l, pad_r, pad_t, pad_b = 64, 20, 24, 52
+    w, h = 680, 338
+    pad_l, pad_r, pad_t, pad_b = 64, 20, 24, 80
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
     n = max(1, len(rotulos))
@@ -316,6 +354,7 @@ def _svg_barras_simples(
 
     elementos.append(
         f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">{_esc(titulo_y)}</text>'
+        + _rodape_svg(w, h)
     )
     return f'<svg viewBox="0 0 {w} {h}" class="svg-chart" role="img">' + "".join(elementos) + "</svg>"
 
@@ -725,8 +764,38 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
       margin: 14px auto;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 8px;
+      padding: 8px 8px 6px 8px;
       background: #ffffff;
+    }}
+    .chart-credit {{
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed #cbd5e1;
+      font-size: 11.5px;
+      color: #334155;
+      text-align: center;
+    }}
+    .author-banner {{
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-left: 5px solid #0f172a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: #0f172a;
+    }}
+    .report-footer {{
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 8px;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }}
+    .print-running-footer {{
+      display: none;
     }}
     .svg-chart {{
       width: 100%;
@@ -764,8 +833,8 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
     .empty-cell {{ text-align: center; color: var(--muted); font-style: italic; padding: 14px; }}
 
     @media print {{
-      @page {{ size: A4 portrait; margin: 10mm; }}
-      body {{ background: #ffffff; font-size: 11.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
+      @page {{ size: A4 portrait; margin: 10mm 10mm 16mm 10mm; }}
+      body {{ background: #ffffff; font-size: 11.5px; padding-bottom: 14mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
       .no-print {{ display: none !important; }}
       .container {{ max-width: 100%; margin: 0; padding: 0; }}
       .section-card {{
@@ -776,6 +845,25 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         break-inside: avoid-page;
       }}
       .chart-wrap {{ max-width: 100%; break-inside: avoid; }}
+      .report-footer {{
+        background: #f1f5f9;
+        color: #0f172a;
+        border: 1px solid #64748b;
+        break-inside: avoid;
+      }}
+      .print-running-footer {{
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border-top: 1px solid #94a3b8;
+        padding: 4px 8px;
+        font-size: 9.5px;
+        color: #1e293b;
+        text-align: center;
+      }}
       table {{ font-size: 10.5px; }}
       thead {{ display: table-header-group; }}
       tr {{ break-inside: avoid; }}
@@ -785,15 +873,24 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
 <body>
   <div class="topbar no-print">
     <div>
-      <div class="topbar-title">Relatório de Auditoria Eleitoral 1º vs. 2º Turno (2026) — UF: {_esc(uf)}</div>
-      <div class="topbar-sub">Dados públicos oficiais verificados por cadeia de hash SHA-256 (.vsc) e SHA-512 (bu.dat / log.jez) • Gerado em {_esc(analise.get('gerado_em', ''))}</div>
+      <div class="topbar-title">Relatório de Auditoria Eleitoral 1º vs. 2º Turno (2026) — UF: {_esc(uf)} • Autor: {_esc(AUTOR_RELATORIO)}</div>
+      <div class="topbar-sub">Fonte dos dados: {_esc(FONTE_DADOS_CURTA)} • Gerado em {_esc(analise.get('gerado_em', ''))}</div>
     </div>
     <div>
       <button type="button" class="btn-print" onclick="window.print()">Imprimir / Salvar em PDF</button>
     </div>
   </div>
 
+  <div class="print-running-footer">
+    <strong>Autor:</strong> {_esc(AUTOR_RELATORIO)} &#160;|&#160; <strong>Fonte dos dados:</strong> {_esc(FONTE_DADOS_CURTA)} &#160;|&#160; UF: {_esc(uf)}
+  </div>
+
   <div class="container">
+    <div class="author-banner">
+      <div><strong>Autor da Auditoria e Relatório:</strong> {_esc(AUTOR_RELATORIO)}</div>
+      <div><strong>Fonte dos Dados:</strong> {_esc(FONTE_DADOS_COMPLETA)}</div>
+    </div>
+
     <div class="section-card">
       <h1>1. Resumo Executivo e Verificação de Integridade — {_esc(uf)}</h1>
       <p>
@@ -884,9 +981,9 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         <strong>mesma seção</strong> no 2º turno. Pontos sobre a linha tracejada preta tiveram comparecimento idêntico nos dois turnos; pontos acima da
         linha tracejada vermelha subiram mais de <strong>+10 pontos percentuais</strong> no 2º turno ou atingiram quase 100% de presença.
       </div>
-      <div class="chart-wrap">{svg_comp}</div>
+      {_bloco_grafico(svg_comp)}
       <h3>2.1. Distribuição da Variação de Comparecimento (Δ pontos percentuais 2ºT − 1ºT)</h3>
-      <div class="chart-wrap">{svg_hist_delta}</div>
+      {_bloco_grafico(svg_hist_delta)}
 
       <h3>2.2. Seções com Maior Salto de Comparecimento do 1º para o 2º Turno ({_fmt_int(cont.get('saltos_comparecimento'))} ocorrências)</h3>
       <div class="table-wrap">
@@ -934,10 +1031,10 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         <code>"O voto do eleitor foi computado"</code>. Quando há fila às 17h00, os eleitores presentes recebem senha e continuam votando após as 17h00.
         No 1º turno (5 cargos na urna), as filas após as 17h00 costumam ser muito maiores do que no 2º turno (apenas 1 ou 2 cargos).
       </div>
-      <div class="chart-wrap">{svg_pos_17h}</div>
+      {_bloco_grafico(svg_pos_17h)}
 
       <h3>3.1. Curva Horária Completa de Votos Computados (08h às 19h+ — 1º Turno vs. 2º Turno)</h3>
-      <div class="chart-wrap">{svg_curva_horaria}</div>
+      {_bloco_grafico(svg_curva_horaria)}
 
       <h3>3.2. Comparativo Político: Urnas Encerradas Até 17h00 vs. Urnas com Votos Após 17h00 (2º Turno)</h3>
       <div class="table-wrap">
@@ -997,7 +1094,7 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         <code>"O voto do eleitor foi computado"</code>). No 1º turno (5 cargos), a mediana típica fica entre 45s e 75s por eleitor; no 2º turno
         (1 ou 2 cargos), o tempo cai para ~25s a 45s. Intervalos repetidos abaixo de 10 segundos merecem inspeção.
       </div>
-      <div class="chart-wrap">{svg_cadencia}</div>
+      {_bloco_grafico(svg_cadencia)}
       <h3>4.1. Urnas com Menor Tempo Mediano ou Votos em Intervalo Curto (&lt; 10s) ({_fmt_int(cont.get('urnas_votacao_rapida'))} ocorrências)</h3>
       <div class="table-wrap">
         <table>
@@ -1024,7 +1121,7 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         o mesário pode habilitar a urna manualmente digitando o código e o ano de nascimento do eleitor. O gráfico e a tabela abaixo cruzam a
         porcentagem de eleitores liberados sem biometria com a taxa de comparecimento e a votação da seção.
       </div>
-      <div class="chart-wrap">{svg_bio}</div>
+      {_bloco_grafico(svg_bio)}
       <h3>5.1. Seções com Maior Taxa de Habilitação Sem Biometria ({_fmt_int(cont.get('alta_sem_biometria'))} ocorrências)</h3>
       <div class="table-wrap">
         <table>
@@ -1052,7 +1149,7 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         Pontos em laranja mostram seções onde um dos candidatos <strong>perdeu votos absolutos</strong> no 2º turno em comparação ao que já havia recebido
         naquela mesma urna no 1º turno, apesar de o comparecimento da seção não ter caído.
       </div>
-      <div class="chart-wrap">{svg_migr}</div>
+      {_bloco_grafico(svg_migr)}
       <h3>6.1. Seções com Maior Perda Líquida de Votos Absolutos entre 1º e 2º Turno ({_fmt_int(cont.get('perda_liquida_votos'))} ocorrências)</h3>
       <div class="table-wrap">
         <table>
@@ -1145,6 +1242,12 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
           <tbody>{_linhas_dossie(anom.get('dossie_secoes_criticas', []))}</tbody>
         </table>
       </div>
+    </div>
+
+    <div class="report-footer">
+      <div><strong>Autor:</strong> {_esc(AUTOR_RELATORIO)}</div>
+      <div><strong>Fonte dos Dados:</strong> {_esc(FONTE_DADOS_COMPLETA)}</div>
+      <div><strong>Emissão do Relatório ({_esc(uf)}):</strong> {_esc(analise.get('gerado_em', ''))}</div>
     </div>
   </div>
 </body>
