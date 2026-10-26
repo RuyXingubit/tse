@@ -83,19 +83,40 @@ def _segundos_para_hms(seg: int) -> str:
 
 
 def extrair_texto_logd(dados_jez: bytes) -> str:
-    """Descompacta `logd.dat` de um arquivo `.jez` (formato ZIP) inteiramente em memória."""
+    """Descompacta `logd.dat` (incluindo `.jez` aninhados de contingência) em memória."""
     if not dados_jez:
         raise ErroAnaliseLog("log.jez vazio")
+    vistas: set[str] = set()
+    linhas_ordenadas: list[str] = []
     try:
         with zipfile.ZipFile(io.BytesIO(dados_jez)) as zf:
             nomes = zf.namelist()
             if not nomes:
                 raise ErroAnaliseLog("log.jez sem arquivos internos")
-            alvo = "logd.dat" if "logd.dat" in nomes else nomes[0]
-            bruto = zf.read(alvo)
+            # Processa primeiro eventuais `.jez` aninhados (urna substituída/contingência) e depois `logd.dat`
+            for nm in sorted(nomes, key=lambda n: (n.lower() == "logd.dat", n)):
+                bruto = zf.read(nm)
+                if nm.lower().endswith(".jez") and bruto[:4] == b"PK\x03\x04":
+                    try:
+                        with zipfile.ZipFile(io.BytesIO(bruto)) as zf2:
+                            for nm2 in sorted(zf2.namelist()):
+                                if nm2.lower().endswith(".dat"):
+                                    txt2 = zf2.read(nm2).decode("latin-1", errors="replace")
+                                    for l in txt2.splitlines():
+                                        if l not in vistas:
+                                            vistas.add(l)
+                                            linhas_ordenadas.append(l)
+                    except zipfile.BadZipFile:
+                        continue
+                elif nm.lower().endswith(".dat") or len(nomes) == 1:
+                    txt = bruto.decode("latin-1", errors="replace")
+                    for l in txt.splitlines():
+                        if l not in vistas:
+                            vistas.add(l)
+                            linhas_ordenadas.append(l)
     except (zipfile.BadZipFile, OSError, KeyError) as e:
         raise ErroAnaliseLog(f"falha ao abrir log.jez: {e}") from e
-    return bruto.decode("latin-1", errors="replace")
+    return "\n".join(linhas_ordenadas)
 
 
 def analisar_log_por_datas(

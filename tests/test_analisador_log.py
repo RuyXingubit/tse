@@ -74,3 +74,24 @@ def test_log_invalido_levanta_excecao():
         analisar_log_por_datas(b"")
     with pytest.raises(ErroAnaliseLog):
         analisar_log_por_datas(b"nao-e-um-zip")
+
+
+def test_log_jez_com_contingencia_aninhada_soma_sem_duplicar():
+    jez_anterior = construir_log_jez([
+        "04/10/2026 08:10:00\tINFO\t01111111\tVOTA\tO voto do eleitor foi computado\tA1",
+        "04/10/2026 08:20:00\tINFO\t01111111\tVOTA\tO voto do eleitor foi computado\tA2",
+    ])
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("011111110410202614000001ME.jez", jez_anterior)
+        zf.writestr("0222222204102026150000-01.jez", jez_anterior)  # cópia idêntica da ME
+        zf.writestr(
+            "logd.dat",
+            (
+                "04/10/2026 15:10:00\tINFO\t02222222\tVOTA\tO voto do eleitor foi computado\tB1\n"
+            ).encode("latin-1"),
+        )
+    res = analisar_log_por_datas(buf.getvalue(), ("04/10/2026",), uf="pa")["04/10/2026"]
+    assert res.votos_computados == 3
+    assert res.ids_urna == ["01111111", "02222222"]
+    assert res.trocou_urna_no_dia is True

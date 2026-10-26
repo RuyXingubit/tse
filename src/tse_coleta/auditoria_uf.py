@@ -277,11 +277,11 @@ async def processar_secao_1t_2t(
                 erros.append("2T log.jez SHA-512 ausente no vsc")
         del bytes_log_2t
 
-    # Se o log do 2T não continha os votos de 04/10/2026 (ex. urna trocada entre turnos), baixa o log do 1T
+    # Se o log do 2T não continha todos os votos de 04/10/2026 (ex. urna trocada ou contingência no 1T), baixa o log do 1T
     precisa_log_1t = (
         bu_1t is not None
         and bu_1t.comparecimento_urna > 0
-        and log_1t.votos_computados == 0
+        and log_1t.votos_computados != bu_1t.comparecimento_urna
         and bool(hash_1t_atual)
         and vsc_1t is not None
     )
