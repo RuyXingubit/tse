@@ -51,8 +51,8 @@ def _fmt_pct(v: float | None, casas: int = 2) -> str:
 
 
 def _svg_scatter_comparecimento(pontos: list[dict]) -> str:
-    w, h = 680, 448
-    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 76
+    w, h = 680, 472
+    pad_l, pad_r, pad_t, pad_b = 58, 24, 52, 76
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
 
@@ -101,9 +101,22 @@ def _svg_scatter_comparecimento(pontos: list[dict]) -> str:
                 f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.2" fill="#2563eb" fill-opacity="0.38"><title>{titulo}</title></circle>'
             )
 
+    legenda = (
+        f'<rect x="{pad_l}" y="6" width="{pw}" height="34" fill="#f8fafc" stroke="#e2e8f0" rx="5" />'
+        f'<circle cx="{pad_l + 14}" cy="16" r="4" fill="#2563eb" fill-opacity="0.75" />'
+        f'<text x="{pad_l + 24}" y="20" font-size="10.5" font-weight="600" fill="#1e293b">Seção Normal (&lt; +10 p.p. e &lt; 99%)</text>'
+        f'<circle cx="{pad_l + 238}" cy="16" r="4.5" fill="#dc2626" />'
+        f'<text x="{pad_l + 248}" y="20" font-size="10.5" font-weight="600" fill="#991b1b">Seção em Alerta (Salto ≥ +10 p.p. ou ≥ 99%)</text>'
+        f'<line x1="{pad_l + 8}" y1="31" x2="{pad_l + 26}" y2="31" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="4,3" />'
+        f'<text x="{pad_l + 32}" y="34" font-size="10" fill="#334155">Linha de Igualdade (2ºT = 1ºT)</text>'
+        f'<line x1="{pad_l + 232}" y1="31" x2="{pad_l + 250}" y2="31" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="3,3" />'
+        f'<text x="{pad_l + 256}" y="34" font-size="10" fill="#991b1b">Limiar de Salto (+10 p.p. no 2ºT)</text>'
+    )
+
     return (
         f'<svg viewBox="0 0 {w} {h}" class="svg-chart" role="img" aria-label="Dispersão de comparecimento 1º vs 2º turno">'
         f'<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="8" />'
+        + legenda
         + "".join(grades)
         + diag
         + diag_mais10
@@ -117,8 +130,8 @@ def _svg_scatter_comparecimento(pontos: list[dict]) -> str:
 
 
 def _svg_scatter_migracao(pontos: list[dict]) -> str:
-    w, h = 680, 448
-    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 76
+    w, h = 680, 472
+    pad_l, pad_r, pad_t, pad_b = 58, 24, 52, 76
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
 
@@ -174,9 +187,20 @@ def _svg_scatter_migracao(pontos: list[dict]) -> str:
                 f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.2" fill="#0284c7" fill-opacity="0.38"><title>{titulo}</title></circle>'
             )
 
+    legenda = (
+        f'<rect x="{pad_l}" y="6" width="{pw}" height="34" fill="#f8fafc" stroke="#e2e8f0" rx="5" />'
+        f'<circle cx="{pad_l + 14}" cy="16" r="4" fill="#0284c7" fill-opacity="0.75" />'
+        f'<text x="{pad_l + 24}" y="20" font-size="10.5" font-weight="600" fill="#1e293b">Seção Normal (Evolução esperada de votos)</text>'
+        f'<circle cx="{pad_l + 266}" cy="16" r="4.5" fill="#d97706" />'
+        f'<text x="{pad_l + 276}" y="20" font-size="10.5" font-weight="600" fill="#92400e">Seção em Alerta (Perda líquida &gt; 15 votos no 2ºT)</text>'
+        f'<line x1="{pad_l + 8}" y1="31" x2="{pad_l + 26}" y2="31" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4,3" />'
+        f'<text x="{pad_l + 32}" y="34" font-size="10" fill="#334155">Eixos Zero (Δ = 0): seções à esquerda de X=0 perderam votos no Cand. 13; abaixo de Y=0 perderam no Cand. 22</text>'
+    )
+
     return (
         f'<svg viewBox="0 0 {w} {h}" class="svg-chart" role="img" aria-label="Migração de votos 1º para 2º turno">'
         f'<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="8" />'
+        + legenda
         + "".join(grades)
         + eixos
         + "".join(normais)
@@ -189,8 +213,8 @@ def _svg_scatter_migracao(pontos: list[dict]) -> str:
 
 
 def _svg_scatter_biometria(pontos: list[dict]) -> str:
-    w, h = 680, 428
-    pad_l, pad_r, pad_t, pad_b = 58, 24, 26, 76
+    w, h = 680, 452
+    pad_l, pad_r, pad_t, pad_b = 58, 24, 48, 76
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
 
@@ -220,6 +244,12 @@ def _svg_scatter_biometria(pontos: list[dict]) -> str:
             f'<text x="{pad_l - 8}" y="{yg + 4:.1f}" text-anchor="end" font-size="11" fill="#475569">{gy}%</text>'
         )
 
+    x_lim25 = cx(25.0)
+    linha_lim25 = (
+        f'<line x1="{x_lim25:.1f}" y1="{pad_t}" x2="{x_lim25:.1f}" y2="{pad_t + ph}" '
+        f'stroke="#7c3aed" stroke-width="1.3" stroke-dasharray="4,3" />'
+    )
+
     normais = []
     alertas = []
     for p in pontos:
@@ -237,10 +267,22 @@ def _svg_scatter_biometria(pontos: list[dict]) -> str:
                 f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.2" fill="#64748b" fill-opacity="0.38"><title>{titulo}</title></circle>'
             )
 
+    legenda = (
+        f'<rect x="{pad_l}" y="6" width="{pw}" height="32" fill="#f8fafc" stroke="#e2e8f0" rx="5" />'
+        f'<circle cx="{pad_l + 14}" cy="16" r="4" fill="#64748b" fill-opacity="0.75" />'
+        f'<text x="{pad_l + 24}" y="20" font-size="10.5" font-weight="600" fill="#1e293b">Seção Normal (&lt; 25% Sem Biometria)</text>'
+        f'<circle cx="{pad_l + 236}" cy="16" r="4.5" fill="#7c3aed" />'
+        f'<text x="{pad_l + 246}" y="20" font-size="10.5" font-weight="600" fill="#5b21b6">Seção em Alerta Crítico (≥ 25% Sem Biometria ou Salto ≥ +15 p.p.)</text>'
+        f'<line x1="{pad_l + 8}" y1="30" x2="{pad_l + 26}" y2="30" stroke="#7c3aed" stroke-width="1.3" stroke-dasharray="4,3" />'
+        f'<text x="{pad_l + 32}" y="33" font-size="10" fill="#4c1d95">Linha Vertical Roxa (25%): Limiar de Alerta de Alta Liberação Manual pelo Mesário</text>'
+    )
+
     return (
         f'<svg viewBox="0 0 {w} {h}" class="svg-chart" role="img" aria-label="Sem biometria vs comparecimento">'
         f'<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="8" />'
+        + legenda
         + "".join(grades)
+        + linha_lim25
         + "".join(normais)
         + "".join(alertas)
         + f'<text x="{pad_l + pw / 2:.1f}" y="{h - 34}" text-anchor="middle" font-size="12" font-weight="600" fill="#1e293b">Eleitores Liberados Sem Biometria no 2º Turno (%)</text>'
@@ -256,19 +298,23 @@ def _svg_barras_duplas(
     serie_2t: list[int],
     *,
     titulo_y: str,
+    titulo_x: str = "",
     legenda_1: str = "1º Turno (04/10)",
     legenda_2: str = "2º Turno (25/10)",
     cor_1: str = "#2563eb",
     cor_2: str = "#dc2626",
 ) -> str:
-    w, h = 680, 368
-    pad_l, pad_r, pad_t, pad_b = 64, 20, 36, 84
+    w, h = 680, 384
+    pad_l, pad_r, pad_t, pad_b = 64, 20, 42, 92
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
     n = max(1, len(rotulos))
     max_y = max(serie_1t + serie_2t + [1])
 
-    elementos = [f'<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="8" />']
+    elementos = [
+        f'<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="8" />',
+        f'<rect x="{pad_l}" y="6" width="{pw}" height="24" fill="#f8fafc" stroke="#e2e8f0" rx="5" />',
+    ]
     for i in range(5):
         v = int(round(max_y * i / 4))
         yg = pad_t + ph - (i / 4) * ph
@@ -300,29 +346,48 @@ def _svg_barras_duplas(
                 f'<text x="{x_centro:.1f}" y="{pad_t + ph + 18}" text-anchor="middle" font-size="10" fill="#334155">{_esc(rot)}</text>'
             )
 
+    offset_leg2 = max(210, int(len(legenda_1) * 7.2) + 46)
+    bloco_tx = (
+        f'<text x="{pad_l + pw / 2:.1f}" y="{h - 34}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b">{_esc(titulo_x)}</text>'
+        if titulo_x
+        else ""
+    )
+
     # Legenda no topo + rodapé de autoria e fonte
     elementos.append(
-        f'<rect x="{pad_l}" y="8" width="12" height="12" fill="{cor_1}" rx="2" />'
-        f'<text x="{pad_l + 18}" y="18" font-size="11.5" font-weight="600" fill="#1e293b">{_esc(legenda_1)}</text>'
-        f'<rect x="{pad_l + 170}" y="8" width="12" height="12" fill="{cor_2}" rx="2" />'
-        f'<text x="{pad_l + 188}" y="18" font-size="11.5" font-weight="600" fill="#1e293b">{_esc(legenda_2)}</text>'
-        f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">{_esc(titulo_y)}</text>'
+        f'<rect x="{pad_l + 10}" y="12" width="12" height="12" fill="{cor_1}" rx="2" />'
+        f'<text x="{pad_l + 28}" y="22" font-size="11" font-weight="600" fill="#1e293b">{_esc(legenda_1)}</text>'
+        f'<rect x="{pad_l + offset_leg2}" y="12" width="12" height="12" fill="{cor_2}" rx="2" />'
+        f'<text x="{pad_l + offset_leg2 + 18}" y="22" font-size="11" font-weight="600" fill="#1e293b">{_esc(legenda_2)}</text>'
+        + bloco_tx
+        + f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">{_esc(titulo_y)}</text>'
         + _rodape_svg(w, h)
     )
     return f'<svg viewBox="0 0 {w} {h}" class="svg-chart" role="img">' + "".join(elementos) + "</svg>"
 
 
 def _svg_barras_simples(
-    rotulos: list[str], valores: list[int], *, titulo_y: str, cor: str = "#0284c7"
+    rotulos: list[str],
+    valores: list[int],
+    *,
+    titulo_y: str,
+    titulo_x: str = "",
+    legenda: str = "Quantidade de Seções Eleitorais",
+    cor: str = "#0284c7",
 ) -> str:
-    w, h = 680, 338
-    pad_l, pad_r, pad_t, pad_b = 64, 20, 24, 80
+    w, h = 680, 368
+    pad_l, pad_r, pad_t, pad_b = 64, 20, 42, 88
     pw = w - pad_l - pad_r
     ph = h - pad_t - pad_b
     n = max(1, len(rotulos))
     max_y = max(valores + [1])
 
-    elementos = [f'<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="8" />']
+    elementos = [
+        f'<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="8" />',
+        f'<rect x="{pad_l}" y="6" width="{pw}" height="24" fill="#f8fafc" stroke="#e2e8f0" rx="5" />',
+        f'<rect x="{pad_l + 10}" y="12" width="12" height="12" fill="{cor}" rx="2" />',
+        f'<text x="{pad_l + 28}" y="22" font-size="11" font-weight="600" fill="#1e293b">{_esc(legenda)}</text>',
+    ]
     for i in range(5):
         v = int(round(max_y * i / 4))
         yg = pad_t + ph - (i / 4) * ph
@@ -345,8 +410,15 @@ def _svg_barras_simples(
             f'<text x="{xc:.1f}" y="{pad_t + ph + 18}" text-anchor="middle" font-size="10.5" fill="#334155">{_esc(rot)}</text>'
         )
 
+    bloco_tx = (
+        f'<text x="{pad_l + pw / 2:.1f}" y="{h - 34}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b">{_esc(titulo_x)}</text>'
+        if titulo_x
+        else ""
+    )
+
     elementos.append(
-        f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">{_esc(titulo_y)}</text>'
+        bloco_tx
+        + f'<text x="16" y="{pad_t + ph / 2:.1f}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b" transform="rotate(-90 16 {pad_t + ph / 2:.1f})">{_esc(titulo_y)}</text>'
         + _rodape_svg(w, h)
     )
     return f'<svg viewBox="0 0 {w} {h}" class="svg-chart" role="img">' + "".join(elementos) + "</svg>"
@@ -425,6 +497,8 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         ordem_delta,
         [int(d_comp_map.get(k, 0)) for k in ordem_delta],
         titulo_y="Nº de Seções",
+        titulo_x="Faixas de Variação do Comparecimento em Pontos Percentuais (2ºT − 1ºT)",
+        legenda="Seções Eleitorais por Faixa de Variação de Comparecimento (p.p.)",
         cor="#0f766e",
     )
 
@@ -436,6 +510,9 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         s1_17h,
         s2_17h,
         titulo_y="Votos Computados Após 17h",
+        titulo_x="Janela de Horário Após as 17h00 (Horário Local da Urna)",
+        legenda_1="1º Turno (04/10/2026)",
+        legenda_2="2º Turno (25/10/2026)",
     )
 
     horas_dia = [f"{h:02d}" for h in range(8, 20)]
@@ -446,6 +523,9 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         [int(ch1.get(h, 0)) for h in horas_dia],
         [int(ch2.get(h, 0)) for h in horas_dia],
         titulo_y="Votos Computados por Hora",
+        titulo_x="Hora do Dia (Horário Registrado no Log da Urna)",
+        legenda_1="1º Turno (04/10/2026)",
+        legenda_2="2º Turno (25/10/2026)",
         cor_1="#0284c7",
         cor_2="#ea580c",
     )
@@ -458,6 +538,9 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         [int(m_int_1t.get(k, 0)) for k in ordem_int],
         [int(m_int_2t.get(k, 0)) for k in ordem_int],
         titulo_y="Nº de Urnas por Mediana",
+        titulo_x="Tempo Mediano entre Eleitores Consecutivos na Mesma Seção (Segundos)",
+        legenda_1="1º Turno (04/10/2026)",
+        legenda_2="2º Turno (25/10/2026)",
         cor_1="#4f46e5",
         cor_2="#059669",
     )
@@ -471,8 +554,9 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         s13_sub,
         s22_sub,
         titulo_y="Ganho Líquido de Votos (2ºT − 1ºT)",
-        legenda_1="Ganho Candidato 13",
-        legenda_2="Ganho Candidato 22",
+        titulo_x="Faixas de Aumento de Comparecimento nas Seções que Subiram no 2º Turno",
+        legenda_1="Ganho Líquido Candidato 13",
+        legenda_2="Ganho Líquido Candidato 22",
         cor_1="#dc2626",
         cor_2="#2563eb",
     )
@@ -485,8 +569,9 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         [int(cm1.get(h, 0)) for h in horas_man],
         [int(cm2.get(h, 0)) for h in horas_man],
         titulo_y="Liberações Sem Biometria / Hora",
-        legenda_1="1º Turno (Manuais)",
-        legenda_2="2º Turno (Manuais)",
+        titulo_x="Hora da Solicitação de Dado Pessoal para Habilitação Manual (Seções Críticas)",
+        legenda_1="1º Turno — Habilitações Manuais",
+        legenda_2="2º Turno — Habilitações Manuais",
         cor_1="#64748b",
         cor_2="#7c3aed",
     )
@@ -498,6 +583,8 @@ def gerar_relatorio_html(analise: dict, destino: Path) -> Path:
         rot_ap[:14],
         val_ap[:14],
         titulo_y="Nº de Seções com Variação",
+        titulo_x="Diferença de Eleitores Aptos na Seção (Aptos 2ºT − Aptos 1ºT)",
+        legenda="Seções Eleitorais com Mudança no Cadastro de Aptos entre Turnos",
         cor="#b45309",
     )
 

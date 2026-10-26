@@ -22,7 +22,11 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from .auditoria_uf import consolidar_analise_uf, executar_auditoria_uf
+from .auditoria_uf import (
+    consolidar_analise_uf,
+    executar_auditoria_uf,
+    exportar_csv_prioridade_fiscais,
+)
 from .ciclo import UFS, ConfigCiclo
 from .cliente import MAX_REQ_PADRAO, ClienteTSE
 from .codigos import Caminhos, validar
@@ -192,6 +196,12 @@ def argumentos_auditoria(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="regenera a consolidação e o relatório HTML a partir de resumo_secoes.jsonl já salvo",
     )
+    p.add_argument(
+        "--docs-dir",
+        type=Path,
+        default=Path("docs/relatorios"),
+        help="pasta pública no repositório Git onde os relatórios HTML/CSV serão espelhados (padrão: docs/relatorios)",
+    )
     p.add_argument("--sem-caffeinate", action="store_true")
     a = p.parse_args(argv)
     a.uf = validar("uf", a.uf.strip().lower())
@@ -219,10 +229,28 @@ async def principal_auditoria(a: argparse.Namespace) -> int:
     pasta_uf = a.raiz / "auditoria" / a.uf
     arq_analise = pasta_uf / "analise_consolidada.json"
     arq_html = pasta_uf / f"relatorio_{a.uf}_1t_2t.html"
+    arq_csv = pasta_uf / f"prioridade_fiscais_{a.uf}.csv"
+
+    def _publicar_em_docs(analise_doc: dict) -> None:
+        lista_csv = (analise_doc.get("prioridade_fiscais") or {}).pop(
+            "_lista_completa_csv",
+            (analise_doc.get("prioridade_fiscais") or {}).get("lista_ordenada_por_tamanho", []),
+        )
+        if lista_csv:
+            exportar_csv_prioridade_fiscais(lista_csv, arq_csv)
+        gerar_relatorio_html(analise_doc, arq_html)
+        if a.docs_dir:
+            pasta_docs_uf = a.docs_dir / a.uf
+            pasta_docs_uf.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(arq_html, pasta_docs_uf / arq_html.name)
+            shutil.copy2(arq_analise, pasta_docs_uf / arq_analise.name)
+            if arq_csv.is_file():
+                shutil.copy2(arq_csv, pasta_docs_uf / arq_csv.name)
+            log.info("relatórios espelhados em %s", pasta_docs_uf)
 
     if a.apenas_relatorio and arq_analise.is_file():
         analise = json.loads(arq_analise.read_text(encoding="utf-8"))
-        gerar_relatorio_html(analise, arq_html)
+        _publicar_em_docs(analise)
         log.info("relatório regenerado: %s", arq_html)
         return 0
 
@@ -270,7 +298,7 @@ async def principal_auditoria(a: argparse.Namespace) -> int:
             return 130
 
     analise = json.loads(arq_an.read_text(encoding="utf-8"))
-    gerar_relatorio_html(analise, arq_html)
+    _publicar_em_docs(analise)
     log.info("resumo salvo em %s e análise em %s", arq_gz, arq_an)
     log.info("relatório HTML/PDF gerado em %s", arq_html)
     log.info("fim. estatísticas HTTP: %s", dict(c.estatisticas))

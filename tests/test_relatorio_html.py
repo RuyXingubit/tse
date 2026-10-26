@@ -107,3 +107,5 @@ def test_gerar_relatorio_html_xhtml_valido_com_print_pdf(tmp_path):
         svg_str = ET.tostring(svg, encoding="unicode")
         assert "Ruy França" in svg_str
         assert "resultados.tse.jus.br" in svg_str
+        # Confere que todo SVG tem caixa de legenda no topo (#f8fafc)
+        assert "#f8fafc" in svg_str
