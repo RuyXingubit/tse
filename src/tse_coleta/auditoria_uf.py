@@ -181,7 +181,8 @@ async def processar_secao_1t_2t(
     prefixo_1t = f"o{PLEITO_1T.zfill(5)}{uf}{sec_id.municipio}{sec_id.zona}{sec_id.secao}"
 
     # --- 1º TURNO ---
-    hash_snap_1t = (info_snap_1t or {}).get("hashes", [""])[0] if info_snap_1t else ""
+    hashes_lista_snap = (info_snap_1t or {}).get("hashes") or []
+    hash_snap_1t = hashes_lista_snap[0] if hashes_lista_snap else ""
     dh_snap_1t = (info_snap_1t or {}).get("data_hora_lista", "")
     dh_lista_1t = (sec_1t.data_hora or "") if sec_1t else ""
 
@@ -492,11 +493,27 @@ async def executar_auditoria_uf(
                         return
                     s1 = urnas_1t.get(chave)
                     s2 = urnas_2t.get(chave)
-                    mun_cd = (s2 or s1).id.municipio  # type: ignore[union-attr]
+                    sec_ref = (s2 or s1).id  # type: ignore[union-attr]
+                    mun_cd = sec_ref.municipio
                     nome_mun = mapa_mun.get(mun_cd, mun_cd)
-                    reg = await processar_secao_1t_2t(
-                        cliente, s1, s2, hashes_snap.get(chave), nome_mun
-                    )
+                    try:
+                        reg = await processar_secao_1t_2t(
+                            cliente, s1, s2, hashes_snap.get(chave), nome_mun
+                        )
+                    except Exception as exc:
+                        log.warning("erro inesperado na seção %s: %s", chave, exc)
+                        reg = {
+                            "chave": chave,
+                            "uf": uf,
+                            "municipio": mun_cd,
+                            "nome_municipio": nome_mun,
+                            "zona": sec_ref.zona,
+                            "secao": sec_ref.secao,
+                            "local": 0,
+                            "completa_1t": False,
+                            "completa_2t": False,
+                            "erros": [f"exceção: {exc}"],
+                        }
                     async with trava_escrita:
                         f_out.write(json.dumps(reg, ensure_ascii=False, sort_keys=True) + "\n")
                         prontas[chave] = reg

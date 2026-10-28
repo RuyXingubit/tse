@@ -1,0 +1,367 @@
+prioridade_ordem,municipio,zona,secao,local_votacao,aptos_2t,comp_1t,pct_comp_1t,comp_2t,pct_comp_2t,delta_comp_pp,sem_bio_2t,pct_sem_bio_2t,mesario_lider_id,mesario_lider_habilitacoes,votos_13_1t,votos_13_2t,votos_22_1t,votos_22_2t,score_atipicidade,motivos_fiscalizacao
+1,PORTO,0001,1864,1015,800,394,49.25,459,57.38,8.13,0,0.0,,0,179,248,158,199,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+2,PORTO,0001,1856,1015,800,385,48.19,417,52.12,3.93,0,0.0,,0,184,219,159,187,18.0,Número de eleitores aptos mudou entre turnos: 799 (1T) -> 800 (2T)
+3,BOSTON,0001,3091,1090,800,289,36.12,349,43.62,7.5,0,0.0,,0,90,115,182,227,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+4,BOSTON,0001,0564,1023,800,257,32.12,304,38.0,5.88,0,0.0,,0,62,91,164,205,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+5,PORTO,0001,3743,1015,799,454,56.82,475,59.45,2.63,0,0.0,,0,207,254,202,211,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+6,PORTO,0001,3894,1050,799,406,50.75,436,54.57,3.82,0,0.0,,0,184,218,165,196,18.0,Número de eleitores aptos mudou entre turnos: 800 (1T) -> 799 (2T)
+7,PORTO,0001,1874,1015,799,381,47.74,423,52.94,5.2,0,0.0,,0,188,224,156,192,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T)
+8,PORTO,0001,1853,1015,799,384,48.12,417,52.19,4.07,0,0.0,,0,177,220,159,189,30.0,"Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+9,SYDNEY,0001,1957,1015,799,318,39.85,389,48.69,8.84,0,0.0,,0,161,237,100,142,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T)
+10,LONDRES,0001,1633,1015,799,332,41.6,384,48.06,6.46,0,0.0,,0,200,246,108,134,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T)
+11,PORTO,0001,1858,1015,799,359,44.93,383,47.93,3.0,0,0.0,,0,156,197,160,177,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+12,PORTO,0001,3772,1015,799,338,42.36,365,45.68,3.32,0,0.0,,0,137,171,168,186,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T)
+13,MADRI,0001,0023,1023,799,300,37.59,338,42.3,4.71,0,0.0,,0,157,192,110,132,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T)
+14,LONDRES,0001,1621,1015,799,278,34.79,314,39.3,4.51,0,0.0,,0,148,198,93,110,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+15,ORLANDO,0001,1177,1015,799,271,33.92,306,38.3,4.38,0,0.0,,0,48,78,209,224,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+16,BOSTON,0001,0733,1023,799,240,30.04,302,37.8,7.76,0,0.0,,0,57,78,167,222,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+17,LONDRES,0001,1623,1015,799,241,30.2,297,37.17,6.97,0,0.0,,0,113,166,99,123,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T)
+18,BOSTON,0001,0859,1023,799,244,30.54,278,34.79,4.25,0,0.0,,0,59,90,172,185,12.0,"Evento operacional no log: 5 reinício(s) durante votação, 2 regressão(ões) de relógio"
+19,BOSTON,0001,0048,1023,799,216,27.03,263,32.92,5.89,0,0.0,,0,62,96,140,165,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 1 regressão(ões) de relógio"
+20,BOSTON,0001,0047,1023,799,216,27.03,251,31.41,4.38,0,0.0,,0,66,92,132,155,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 1 regressão(ões) de relógio"
+21,BARCELONA,0001,1570,1015,799,152,19.07,208,26.03,6.96,0,0.0,,0,110,164,27,41,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 799 (2T)
+22,PORTO,0001,1895,1015,799,147,18.42,180,22.53,4.11,0,0.0,,0,58,96,61,77,38.4,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 799 (2T) | Comparecimento destoante da própria escola: 22.5% nesta sala vs 48.0% nas salas vizinhas (-25.5 p.p.)
+23,SYDNEY,0001,1948,1015,798,435,54.58,488,61.15,6.57,0,0.0,,0,219,271,154,199,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+24,LONDRES,0001,1630,1015,798,366,45.92,414,51.88,5.96,0,0.0,,0,220,280,121,128,30.0,"Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+25,PORTO,0001,1866,1015,798,352,44.17,398,49.87,5.7,0,0.0,,0,157,218,149,172,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+26,PORTO,0001,1863,1015,798,345,43.23,393,49.25,6.02,0,0.0,,0,152,208,149,175,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 4 regressão(ões) de relógio"
+27,MIAMI,0001,0213,1058,798,361,45.24,391,49.0,3.76,0,0.0,,0,60,90,266,296,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 6 regressão(ões) de relógio"
+28,PORTO,0001,1877,1015,798,357,44.74,390,48.87,4.13,0,0.0,,0,158,192,160,182,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+29,PORTO,0001,1860,1015,798,366,45.92,386,48.37,2.45,0,0.0,,0,164,200,151,176,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+30,TORONTO,0001,3273,1066,798,353,44.24,380,47.62,3.38,0,0.0,,0,192,240,121,133,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+31,LONDRES,0001,1058,1015,798,335,42.03,376,47.12,5.09,0,0.0,,0,193,235,111,134,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+32,MIAMI,0001,0216,1058,798,325,40.83,369,46.24,5.41,0,0.0,,0,53,76,245,287,30.0,"Número de eleitores aptos mudou entre turnos: 796 (1T) -> 798 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+33,LONDRES,0001,1095,1015,798,332,41.66,364,45.61,3.95,0,0.0,,0,179,212,115,144,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+34,PORTO,0001,1881,1015,798,269,33.75,299,37.47,3.72,0,0.0,,0,127,156,113,134,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+35,MIAMI,0001,1162,1058,798,238,29.86,257,32.21,2.35,0,0.0,,0,43,63,171,188,30.0,"Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T) | Evento operacional no log: 4 reinício(s) durante votação, 2 regressão(ões) de relógio"
+36,SÃO FRANCISCO,0001,1206,1015,798,195,24.44,248,31.08,6.64,0,0.0,,0,95,139,80,107,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+37,MADRI,0001,0097,1023,798,222,27.78,247,30.95,3.17,0,0.0,,0,112,137,80,103,18.0,Número de eleitores aptos mudou entre turnos: 799 (1T) -> 798 (2T)
+38,MADRI,0001,0077,1023,798,228,28.61,245,30.7,2.09,0,0.0,,0,119,149,84,92,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+39,BARCELONA,0001,1564,1015,798,184,23.06,240,30.08,7.02,0,0.0,,0,96,130,64,105,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+40,BOSTON,0001,0049,1023,798,194,24.31,240,30.08,5.77,0,0.0,,0,49,82,130,150,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 1 regressão(ões) de relógio"
+41,BARCELONA,0001,1560,1015,798,195,24.41,235,29.45,5.04,0,0.0,,0,119,169,47,57,18.0,Número de eleitores aptos mudou entre turnos: 799 (1T) -> 798 (2T)
+42,MIAMI,0001,1147,1058,798,192,24.09,234,29.32,5.23,0,0.0,,0,39,67,139,165,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T)
+43,MADRI,0001,1063,1023,798,58,7.28,72,9.02,1.74,0,0.0,,0,43,54,9,16,30.9,"Número de eleitores aptos mudou entre turnos: 797 (1T) -> 798 (2T) | Divergência na mesma escola (local 1023): Cand. 22 teve 22.9% nesta sala vs 39.0% nas outras 29 salas (-16.2 p.p., Z=-3.4)"
+44,BRUXELAS,0001,3212,1015,797,476,59.8,507,63.61,3.81,0,0.0,,0,233,287,198,215,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 797 (2T)
+45,LONDRES,0001,1057,1015,797,396,49.75,437,54.83,5.08,0,0.0,,0,238,278,135,153,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 797 (2T)
+46,PORTO,0001,1876,1015,797,408,51.06,434,54.45,3.39,0,0.0,,0,186,230,173,193,18.0,Número de eleitores aptos mudou entre turnos: 799 (1T) -> 797 (2T)
+47,LONDRES,0001,1638,1015,797,353,44.35,426,53.45,9.1,0,0.0,,0,221,293,102,129,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 797 (2T)
+48,LONDRES,0001,1635,1015,797,379,47.49,421,52.82,5.33,0,0.0,,0,226,281,126,133,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 797 (2T)
+49,AMSTERDÃ,0001,0659,1015,797,386,48.49,412,51.69,3.2,0,0.0,,0,237,290,98,114,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 797 (2T)
+50,PORTO,0001,1857,1015,797,373,46.8,402,50.44,3.64,0,0.0,,0,169,213,165,179,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 2 regressão(ões) de relógio"
+51,LONDRES,0001,1656,1015,797,358,44.86,390,48.93,4.07,0,0.0,,0,184,220,139,160,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 797 (2T)
+52,PORTO,0001,1870,1015,797,349,43.84,389,48.81,4.97,0,0.0,,0,172,218,134,161,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 797 (2T)
+53,SYDNEY,0001,1949,1015,797,295,37.01,363,45.55,8.54,0,0.0,,0,119,197,130,162,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+54,LONDRES,0001,1641,1015,797,278,35.01,333,41.78,6.77,0,0.0,,0,166,225,90,103,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 797 (2T)
+55,MADRI,0001,0020,1023,797,286,35.84,319,40.03,4.19,0,0.0,,0,131,164,114,150,18.0,Número de eleitores aptos mudou entre turnos: 798 (1T) -> 797 (2T)
+56,MADRI,0001,0021,1023,797,284,35.63,303,38.02,2.39,0,0.0,,0,151,178,98,113,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+57,LONDRES,0001,1642,1015,797,214,26.88,249,31.24,4.36,0,0.0,,0,123,153,75,87,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 797 (2T)
+58,SÃO FRANCISCO,0001,0760,1015,797,221,27.76,245,30.74,2.98,0,0.0,,0,112,154,86,89,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 797 (2T)
+59,HARTFORD,0001,3134,1015,797,193,24.22,242,30.36,6.14,0,0.0,,0,91,127,91,110,17.1,"Divergência na mesma escola (local 1015): Cand. 22 teve 46.4% nesta sala vs 67.8% nas outras 11 salas (-21.4 p.p., Z=-5.1)"
+60,MONTREAL,0001,0260,1023,796,493,62.01,558,70.1,8.09,0,0.0,,0,322,398,110,145,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 796 (2T)
+61,MONTREAL,0001,0699,1023,796,484,60.73,536,67.34,6.61,0,0.0,,0,306,373,119,152,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 796 (2T)
+62,COPENHAGUE,0001,1699,1015,796,449,56.34,495,62.19,5.85,0,0.0,,0,331,399,65,83,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 796 (2T)
+63,AMSTERDÃ,0001,0655,1015,796,402,50.44,449,56.41,5.97,0,0.0,,0,269,333,81,108,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 796 (2T)
+64,BARCELONA,0001,1410,1015,796,354,44.42,423,53.14,8.72,0,0.0,,0,261,324,57,85,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 796 (2T)
+65,PARIS,0001,0758,1066,796,379,47.61,403,50.63,3.02,0,0.0,,0,268,311,81,84,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+66,LONDRES,0001,1653,1015,796,361,45.29,391,49.12,3.83,0,0.0,,0,191,227,138,155,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 796 (2T)
+67,PORTO,0001,3400,1015,796,322,40.5,377,47.36,6.86,0,0.0,,0,175,224,109,144,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 796 (2T)
+68,MADRI,0001,0017,1023,796,309,38.87,364,45.73,6.86,0,0.0,,0,169,234,101,126,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 796 (2T)
+69,PARIS,0001,0797,1066,796,322,40.45,357,44.85,4.4,0,0.0,,0,236,281,56,67,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+70,LONDRES,0001,1661,1015,796,312,39.25,348,43.72,4.47,0,0.0,,0,146,187,131,153,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 796 (2T)
+71,LONDRES,0001,1649,1015,796,319,40.13,330,41.46,1.33,0,0.0,,0,158,188,136,141,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 796 (2T)
+72,PORTO,0001,2922,1015,796,269,33.88,309,38.82,4.94,0,0.0,,0,164,206,77,96,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 796 (2T)
+73,PARIS,0001,0798,1066,796,271,34.0,306,38.44,4.44,0,0.0,,0,205,252,36,43,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 796 (2T)
+74,BOSTON,0001,0532,1023,796,245,30.78,286,35.93,5.15,0,0.0,,0,53,82,171,197,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+75,BOSTON,0001,0050,1023,796,222,27.89,259,32.54,4.65,0,0.0,,0,62,89,143,168,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 1 regressão(ões) de relógio"
+76,MADRI,0001,0055,1023,796,230,28.86,252,31.66,2.8,0,0.0,,0,131,159,79,85,18.0,Número de eleitores aptos mudou entre turnos: 797 (1T) -> 796 (2T)
+77,FARO,0001,0701,1015,796,175,21.98,218,27.39,5.41,0,0.0,,0,63,96,86,114,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 3 regressão(ões) de relógio"
+78,VANCOUVER,0001,3272,1031,795,494,62.14,526,66.16,4.02,0,0.0,,0,320,375,121,132,9.8,Comparecimento destoante da própria escola: 66.2% nesta sala vs 53.9% nas salas vizinhas (+12.3 p.p.)
+79,BRUXELAS,0001,3293,1015,795,473,59.65,486,61.13,1.48,0,0.0,,0,273,319,162,163,36.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 795 (2T) | Volume elevado de votos após as 17h00 (1T: 72 votos até 18:10:57; 2T: 0 votos até 17:04:01)
+80,LONDRES,0001,1636,1015,795,362,45.65,425,53.46,7.81,0,0.0,,0,231,291,106,128,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 795 (2T)
+81,ZURIQUE,0001,0346,1082,795,356,44.84,415,52.2,7.36,0,0.0,,0,174,241,133,158,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 795 (2T)
+82,GENEBRA,0001,1916,1015,795,358,45.15,400,50.31,5.16,0,0.0,,0,128,188,169,205,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 795 (2T)
+83,SYDNEY,0001,1952,1015,795,331,41.64,400,50.31,8.67,0,0.0,,0,222,282,64,104,12.0,"Evento operacional no log: 5 reinício(s) durante votação, 2 regressão(ões) de relógio"
+84,ZURIQUE,0001,0343,1082,795,348,43.83,394,49.56,5.73,0,0.0,,0,174,216,134,162,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 795 (2T)
+85,LONDRES,0001,1659,1015,795,364,45.73,384,48.3,2.57,0,0.0,,0,188,220,136,153,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 795 (2T)
+86,ZURIQUE,0001,0281,1082,795,311,39.17,372,46.79,7.62,0,0.0,,0,128,201,133,163,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 795 (2T)
+87,PARIS,0001,0774,1066,795,320,40.2,371,46.67,6.47,0,0.0,,0,252,309,48,56,30.0,"Número de eleitores aptos mudou entre turnos: 796 (1T) -> 795 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+88,LONDRES,0001,1647,1015,795,277,34.89,315,39.62,4.73,0,0.0,,0,117,154,129,151,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 795 (2T)
+89,SYDNEY,0001,1961,1031,795,242,30.4,311,39.12,8.72,0,0.0,,0,124,175,82,126,18.0,Número de eleitores aptos mudou entre turnos: 796 (1T) -> 795 (2T)
+90,PORTO,0001,1892,1015,795,219,27.58,274,34.47,6.89,0,0.0,,0,112,161,85,109,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 795 (2T)
+91,BARCELONA,0001,1568,1015,795,215,27.11,270,33.96,6.85,0,0.0,,0,174,232,23,35,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 795 (2T)
+92,MONTREAL,0001,0525,1023,794,501,63.18,561,70.65,7.47,0,0.0,,0,361,440,86,103,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T)
+93,BERLIM,0001,1709,1015,794,539,67.97,551,69.4,1.43,0,0.0,,0,427,467,65,73,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T)
+94,MONTREAL,0001,0259,1023,794,478,60.28,508,63.98,3.7,0,0.0,,0,318,378,104,122,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T)
+95,MONTREAL,0001,0580,1023,794,452,56.86,485,61.08,4.22,0,0.0,,0,257,319,119,150,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 794 (2T)
+96,BERLIM,0001,1716,1015,794,468,59.02,484,60.96,1.94,0,0.0,,0,367,411,53,66,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T)
+97,PORTO,0001,3128,1015,794,388,48.81,444,55.92,7.11,0,0.0,,0,269,328,84,108,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 794 (2T)
+98,PORTO,0001,3222,1015,794,378,47.55,433,54.53,6.98,0,0.0,,0,262,314,92,114,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 794 (2T)
+99,AMSTERDÃ,0001,2955,1015,794,362,45.76,417,52.52,6.76,0,0.0,,0,275,352,45,61,18.0,Número de eleitores aptos mudou entre turnos: 791 (1T) -> 794 (2T)
+100,SYDNEY,0001,1953,1015,794,322,40.61,382,48.11,7.5,0,0.0,,0,204,263,75,113,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T)
+101,PARIS,0001,0786,1066,794,337,42.44,367,46.22,3.78,0,0.0,,0,248,286,57,75,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+102,ZURIQUE,0001,0337,1082,794,272,34.21,351,44.21,10.0,0,0.0,,0,153,227,89,118,30.0,"Salto de comparecimento de 34.2% (1T) para 44.2% (2T) (+10.0 p.p., Z=1.9) | Número de eleitores aptos mudou entre turnos: 795 (1T) -> 794 (2T)"
+103,ZURIQUE,0001,0336,1082,794,304,38.34,351,44.21,5.87,0,0.0,,0,174,234,95,111,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T)
+104,PARIS,0001,0794,1066,794,302,38.08,347,43.7,5.62,0,0.0,,0,223,273,57,69,30.0,"Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+105,BARCELONA,0001,1567,1015,794,289,36.44,342,43.07,6.63,0,0.0,,0,239,296,32,42,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 794 (2T)
+106,COPENHAGUE,0001,1698,1015,793,468,58.87,495,62.42,3.55,0,0.0,,0,356,398,64,78,18.0,Número de eleitores aptos mudou entre turnos: 795 (1T) -> 793 (2T)
+107,BARCELONA,0001,0956,1015,793,404,50.88,481,60.66,9.78,0,0.0,,0,346,422,38,54,30.0,"Número de eleitores aptos mudou entre turnos: 794 (1T) -> 793 (2T) | Evento operacional no log: 5 reinício(s) durante votação, 0 regressão(ões) de relógio"
+108,AMSTERDÃ,0001,0654,1015,793,462,58.33,472,59.52,1.19,0,0.0,,0,330,371,75,92,18.0,Número de eleitores aptos mudou entre turnos: 792 (1T) -> 793 (2T)
+109,PORTO,0001,3389,1015,793,357,45.08,419,52.84,7.76,0,0.0,,0,226,281,94,131,18.0,Número de eleitores aptos mudou entre turnos: 792 (1T) -> 793 (2T)
+110,ZURIQUE,0001,0283,1082,793,345,43.56,407,51.32,7.76,0,0.0,,0,165,231,139,166,18.0,Número de eleitores aptos mudou entre turnos: 792 (1T) -> 793 (2T)
+111,PORTO,0001,3276,1015,793,296,37.28,356,44.89,7.61,0,0.0,,0,142,217,121,133,30.0,"Número de eleitores aptos mudou entre turnos: 794 (1T) -> 793 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 3 regressão(ões) de relógio"
+112,SÃO FRANCISCO,0001,0550,1015,793,289,36.49,349,44.01,7.52,0,0.0,,0,181,242,88,99,30.0,"Número de eleitores aptos mudou entre turnos: 792 (1T) -> 793 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+113,SYDNEY,0001,1950,1015,793,294,37.03,349,44.01,6.98,0,0.0,,0,140,199,102,138,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 793 (2T)
+114,SÃO FRANCISCO,0001,0414,1015,793,301,38.01,342,43.13,5.12,0,0.0,,0,193,242,79,89,18.0,Número de eleitores aptos mudou entre turnos: 792 (1T) -> 793 (2T)
+115,PORTO,0001,3205,1015,793,268,33.75,308,38.84,5.09,0,0.0,,0,149,198,94,106,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 793 (2T)
+116,LONDRES,0001,1628,1015,793,247,31.19,298,37.58,6.39,0,0.0,,0,142,187,81,107,18.0,Número de eleitores aptos mudou entre turnos: 792 (1T) -> 793 (2T)
+117,BEIRUTE,0001,2938,1040,793,274,34.55,293,36.95,2.4,0,0.0,,0,220,250,30,30,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+118,FARO,0001,0693,1015,793,224,28.25,252,31.78,3.53,0,0.0,,0,65,94,122,152,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+119,MADRI,0001,0014,1023,793,233,29.35,236,29.76,0.41,0,0.0,,0,116,143,67,90,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 793 (2T)
+120,DUBLIN,0001,3313,1015,792,492,62.12,529,66.79,4.67,0,0.0,,0,360,426,87,96,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+121,DUBLIN,0001,3322,1015,792,503,63.51,509,64.27,0.76,0,0.0,,0,351,385,96,109,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+122,LISBOA,0001,3827,1080,792,428,54.11,475,59.97,5.86,0,0.0,,0,280,328,118,136,18.0,Número de eleitores aptos mudou entre turnos: 791 (1T) -> 792 (2T)
+123,SYDNEY,0001,1951,1015,792,363,45.83,450,56.82,10.99,0,0.0,,0,201,302,116,140,13.2,"Salto de comparecimento de 45.8% (1T) para 56.8% (2T) (+11.0 p.p., Z=1.3)"
+124,PORTO,0001,3148,1015,792,328,41.31,411,51.89,10.58,0,0.0,,0,203,276,107,135,30.7,"Salto de comparecimento de 41.3% (1T) para 51.9% (2T) (+10.6 p.p., Z=2.5) | Número de eleitores aptos mudou entre turnos: 794 (1T) -> 792 (2T)"
+125,PARIS,0001,0799,1066,792,365,46.14,410,51.77,5.63,0,0.0,,0,300,359,38,47,18.0,Número de eleitores aptos mudou entre turnos: 791 (1T) -> 792 (2T)
+126,PARIS,0001,0776,1066,792,341,43.0,406,51.26,8.26,0,0.0,,0,265,347,52,52,18.0,Número de eleitores aptos mudou entre turnos: 793 (1T) -> 792 (2T)
+127,PARIS,0001,0790,1066,792,388,48.87,403,50.88,2.01,0,0.0,,0,294,329,60,71,18.0,Número de eleitores aptos mudou entre turnos: 794 (1T) -> 792 (2T)
+128,BARCELONA,0001,1573,1015,792,201,25.35,265,33.46,8.11,0,0.0,,0,137,195,44,66,30.0,"Número de eleitores aptos mudou entre turnos: 793 (1T) -> 792 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 4 regressão(ões) de relógio"
+129,PORTO,0001,3192,1015,791,370,46.89,443,56.01,9.12,0,0.0,,0,257,338,80,100,18.0,Número de eleitores aptos mudou entre turnos: 789 (1T) -> 791 (2T)
+130,SYDNEY,0001,3007,1031,791,313,39.62,430,54.36,14.74,0,0.0,,0,214,317,74,105,35.7,"Salto de comparecimento de 39.6% (1T) para 54.4% (2T) (+14.7 p.p., Z=2.9) | Número de eleitores aptos mudou entre turnos: 790 (1T) -> 791 (2T)"
+131,LONDRES,0001,1631,1015,791,362,45.82,396,50.06,4.24,0,0.0,,0,231,275,100,116,30.0,"Número de eleitores aptos mudou entre turnos: 790 (1T) -> 791 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+132,GENEBRA,0001,1907,1015,791,338,42.78,366,46.27,3.49,0,0.0,,0,162,209,130,147,18.0,Número de eleitores aptos mudou entre turnos: 790 (1T) -> 791 (2T)
+133,PORTO,0001,3239,1015,791,322,40.76,364,46.02,5.26,0,0.0,,0,182,244,107,118,18.0,Número de eleitores aptos mudou entre turnos: 790 (1T) -> 791 (2T)
+134,MADRI,0001,0022,1023,791,295,37.25,330,41.72,4.47,0,0.0,,0,157,198,98,121,18.0,Número de eleitores aptos mudou entre turnos: 792 (1T) -> 791 (2T)
+135,PARIS,0001,0803,1066,791,234,29.62,287,36.28,6.66,0,0.0,,0,184,246,34,39,18.0,Número de eleitores aptos mudou entre turnos: 790 (1T) -> 791 (2T)
+136,LONDRES,0001,1640,1015,791,219,27.72,274,34.64,6.92,0,0.0,,0,127,170,76,102,18.0,Número de eleitores aptos mudou entre turnos: 790 (1T) -> 791 (2T)
+137,PARIS,0001,0800,1066,790,377,47.66,420,53.16,5.5,0,0.0,,0,309,363,41,50,18.0,Número de eleitores aptos mudou entre turnos: 791 (1T) -> 790 (2T)
+138,PORTO,0001,3112,1015,790,347,43.98,416,52.66,8.68,0,0.0,,0,234,316,73,96,18.0,Número de eleitores aptos mudou entre turnos: 789 (1T) -> 790 (2T)
+139,SYDNEY,0001,2951,1031,790,314,39.75,393,49.75,10.0,0,0.0,,0,196,270,74,109,12.0,"Salto de comparecimento de 39.8% (1T) para 49.8% (2T) (+10.0 p.p., Z=0.9)"
+140,PORTO,0001,3103,1015,790,293,37.09,324,41.01,3.92,0,0.0,,0,169,218,87,102,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+141,PARIS,0001,0810,1066,790,148,18.71,187,23.67,4.96,0,0.0,,0,123,170,12,16,18.0,Número de eleitores aptos mudou entre turnos: 791 (1T) -> 790 (2T)
+142,OSLO,0001,0479,1015,789,366,46.45,446,56.53,10.08,0,0.0,,0,232,332,79,98,38.3,"Salto de comparecimento de 46.5% (1T) para 56.5% (2T) (+10.1 p.p., Z=0.9) | Número de eleitores aptos mudou entre turnos: 788 (1T) -> 789 (2T) | Comparecimento destoante da própria escola: 56.5% nesta sala vs 46.3% nas salas vizinhas (+10.2 p.p.)"
+143,PORTO,0001,1871,1015,789,393,49.81,412,52.22,2.41,0,0.0,,0,185,216,166,183,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+144,LONDRES,0001,1632,1015,789,339,42.91,385,48.8,5.89,0,0.0,,0,200,247,110,132,30.0,"Número de eleitores aptos mudou entre turnos: 790 (1T) -> 789 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+145,MARSELHA,0001,3528,1015,789,238,30.13,275,34.85,4.72,0,0.0,,0,192,240,31,32,18.0,Número de eleitores aptos mudou entre turnos: 790 (1T) -> 789 (2T)
+146,PARIS,0001,0807,1066,789,147,18.65,202,25.6,6.95,0,0.0,,0,118,177,20,24,18.0,Número de eleitores aptos mudou entre turnos: 788 (1T) -> 789 (2T)
+147,BERLIM,0001,1711,1015,788,525,66.71,535,67.89,1.18,0,0.0,,0,421,469,60,58,18.0,Número de eleitores aptos mudou entre turnos: 787 (1T) -> 788 (2T)
+148,DUBLIN,0001,3315,1015,788,536,67.85,530,67.26,-0.59,0,0.0,,0,357,380,123,144,30.0,"Número de eleitores aptos mudou entre turnos: 790 (1T) -> 788 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+149,ATLANTA,0001,0706,1015,788,337,42.88,391,49.62,6.74,0,0.0,,0,69,98,233,287,18.0,Número de eleitores aptos mudou entre turnos: 786 (1T) -> 788 (2T)
+150,BOSTON,0001,1345,1090,788,302,38.32,347,44.04,5.72,0,0.0,,0,70,98,208,244,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+151,SÃO FRANCISCO,0001,3029,1015,788,114,14.45,161,20.43,5.98,0,0.0,,0,63,113,36,46,18.0,Número de eleitores aptos mudou entre turnos: 789 (1T) -> 788 (2T)
+152,BERLIM,0001,1362,1015,787,550,70.33,579,73.57,3.24,0,0.0,,0,451,502,54,64,18.0,Número de eleitores aptos mudou entre turnos: 782 (1T) -> 787 (2T)
+153,BERLIM,0001,1715,1015,787,474,60.15,513,65.18,5.03,0,0.0,,0,393,443,44,64,18.0,Número de eleitores aptos mudou entre turnos: 788 (1T) -> 787 (2T)
+154,DUBLIN,0001,3142,1015,787,318,40.41,396,50.32,9.91,0,0.0,,0,262,347,39,49,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+155,PARIS,0001,0801,1066,787,332,42.19,385,48.92,6.73,0,0.0,,0,266,324,47,55,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 3 regressão(ões) de relógio"
+156,DUBLIN,0001,3161,1015,787,328,41.68,383,48.67,6.99,0,0.0,,0,272,338,36,41,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+157,BUENOS AIRES,0001,0065,1015,787,307,39.11,374,47.52,8.41,0,0.0,,0,189,256,92,115,18.0,Número de eleitores aptos mudou entre turnos: 785 (1T) -> 787 (2T)
+158,ATLANTA,0001,0977,1015,787,324,41.17,358,45.49,4.32,0,0.0,,0,76,101,214,248,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+159,BOSTON,0001,1388,1112,787,141,17.92,192,24.4,6.48,0,0.0,,0,33,38,101,153,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+160,BERLIM,0001,1714,1015,786,552,70.14,558,70.99,0.85,0,0.0,,0,469,502,38,45,18.0,Número de eleitores aptos mudou entre turnos: 787 (1T) -> 786 (2T)
+161,GENEBRA,0001,1417,1015,785,401,51.02,448,57.07,6.05,0,0.0,,0,198,237,173,204,18.0,Número de eleitores aptos mudou entre turnos: 786 (1T) -> 785 (2T)
+162,BUENOS AIRES,0001,0633,1015,785,308,39.29,357,45.48,6.19,0,0.0,,0,180,224,98,122,18.0,Número de eleitores aptos mudou entre turnos: 784 (1T) -> 785 (2T)
+163,BUENOS AIRES,0001,0818,1015,784,275,35.12,341,43.49,8.37,0,0.0,,0,191,254,64,82,18.0,Número de eleitores aptos mudou entre turnos: 783 (1T) -> 784 (2T)
+164,AMSTERDÃ,0001,3183,1015,784,302,38.67,341,43.49,4.82,0,0.0,,0,201,248,58,89,18.0,Número de eleitores aptos mudou entre turnos: 781 (1T) -> 784 (2T)
+165,AMSTERDÃ,0001,3199,1015,783,423,54.16,469,59.9,5.74,0,0.0,,0,306,366,69,93,18.0,Número de eleitores aptos mudou entre turnos: 781 (1T) -> 783 (2T)
+166,BERLIM,0001,1719,1015,783,447,56.94,466,59.51,2.57,0,0.0,,0,357,389,48,70,18.0,Número de eleitores aptos mudou entre turnos: 785 (1T) -> 783 (2T)
+167,BUENOS AIRES,0001,0507,1015,783,401,51.15,435,55.56,4.41,0,0.0,,0,273,316,92,106,18.0,Número de eleitores aptos mudou entre turnos: 784 (1T) -> 783 (2T)
+168,BUENOS AIRES,0001,0063,1015,783,382,48.72,431,55.04,6.32,0,0.0,,0,261,304,88,119,18.0,Número de eleitores aptos mudou entre turnos: 784 (1T) -> 783 (2T)
+169,BUENOS AIRES,0001,1370,1015,781,255,32.69,286,36.62,3.93,0,0.0,,0,163,194,75,90,31.0,Número de eleitores aptos mudou entre turnos: 780 (1T) -> 781 (2T) | Comparecimento destoante da própria escola: 36.6% nesta sala vs 52.8% nas salas vizinhas (-16.2 p.p.)
+170,ROMA,0001,0866,1015,781,228,29.23,255,32.65,3.42,0,0.0,,0,128,173,66,79,18.0,Número de eleitores aptos mudou entre turnos: 780 (1T) -> 781 (2T)
+171,AMSTERDÃ,0001,3304,1015,780,430,55.2,490,62.82,7.62,0,0.0,,0,321,403,60,70,18.0,Número de eleitores aptos mudou entre turnos: 779 (1T) -> 780 (2T)
+172,AMSTERDÃ,0001,3137,1015,780,411,52.62,488,62.56,9.94,0,0.0,,0,305,397,67,85,18.0,Número de eleitores aptos mudou entre turnos: 781 (1T) -> 780 (2T)
+173,BUENOS AIRES,0001,0536,1015,780,423,54.3,445,57.05,2.75,0,0.0,,0,300,329,95,111,37.0,Número de eleitores aptos mudou entre turnos: 779 (1T) -> 780 (2T) | Volume elevado de votos após as 17h00 (1T: 76 votos até 18:37:02; 2T: 2 votos até 17:08:53)
+174,CAMBERRA,0001,0744,1031,780,398,51.03,431,55.26,4.23,0,0.0,,0,163,220,144,186,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 3 regressão(ões) de relógio"
+175,BUENOS AIRES,0001,0993,1015,780,401,51.48,430,55.13,3.65,0,0.0,,0,260,291,106,128,18.0,Número de eleitores aptos mudou entre turnos: 779 (1T) -> 780 (2T)
+176,LISBOA,0001,0606,1031,780,236,30.26,274,35.13,4.87,0,0.0,,0,79,120,129,147,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+177,DUBLIN,0001,3245,1015,779,322,41.39,397,50.96,9.57,0,0.0,,0,246,342,50,53,30.0,"Número de eleitores aptos mudou entre turnos: 778 (1T) -> 779 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+178,BOGOTÁ,0001,0029,1015,779,275,35.26,295,37.87,2.61,0,0.0,,0,127,160,118,129,18.0,Número de eleitores aptos mudou entre turnos: 780 (1T) -> 779 (2T)
+179,AMSTERDÃ,0001,3125,1015,778,401,51.48,438,56.3,4.82,0,0.0,,0,310,359,51,72,18.0,Número de eleitores aptos mudou entre turnos: 779 (1T) -> 778 (2T)
+180,TORONTO,0001,3258,1066,778,350,45.05,401,51.54,6.49,0,0.0,,0,195,242,126,147,18.0,Número de eleitores aptos mudou entre turnos: 777 (1T) -> 778 (2T)
+181,LISBOA,0001,0621,1031,778,311,39.92,358,46.02,6.1,0,0.0,,0,157,209,116,139,30.0,"Número de eleitores aptos mudou entre turnos: 779 (1T) -> 778 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+182,LOS ANGELES,0001,1144,1023,778,192,24.71,244,31.36,6.65,0,0.0,,0,98,157,65,78,18.0,Número de eleitores aptos mudou entre turnos: 777 (1T) -> 778 (2T)
+183,LISBOA,0001,0620,1031,777,291,37.4,323,41.57,4.17,0,0.0,,0,132,164,122,151,18.0,Número de eleitores aptos mudou entre turnos: 778 (1T) -> 777 (2T)
+184,LISBOA,0001,0539,1031,777,201,25.9,231,29.73,3.83,0,0.0,,0,81,124,79,95,18.0,Número de eleitores aptos mudou entre turnos: 776 (1T) -> 777 (2T)
+185,LISBOA,0001,0596,1031,776,293,37.81,339,43.69,5.88,0,0.0,,0,126,179,128,154,18.0,Número de eleitores aptos mudou entre turnos: 775 (1T) -> 776 (2T)
+186,LISBOA,0001,0544,1031,776,220,28.39,244,31.44,3.05,0,0.0,,0,89,127,101,112,18.0,Número de eleitores aptos mudou entre turnos: 775 (1T) -> 776 (2T)
+187,LISBOA,0001,0623,1031,775,301,38.89,354,45.68,6.79,0,0.0,,0,159,205,110,143,18.0,Número de eleitores aptos mudou entre turnos: 774 (1T) -> 775 (2T)
+188,LISBOA,0001,0538,1031,775,187,24.13,266,34.32,10.19,0,0.0,,0,115,191,55,72,12.2,"Salto de comparecimento de 24.1% (1T) para 34.3% (2T) (+10.2 p.p., Z=2.6)"
+189,TORONTO,0001,3055,1066,774,367,47.42,414,53.49,6.07,0,0.0,,0,186,247,140,160,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+190,TORONTO,0001,1488,1066,774,295,38.16,342,44.19,6.03,0,0.0,,0,133,166,134,169,18.0,Número de eleitores aptos mudou entre turnos: 773 (1T) -> 774 (2T)
+191,TORONTO,0001,2989,1066,774,284,36.69,339,43.8,7.11,0,0.0,,0,129,171,115,153,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+192,TORONTO,0001,3081,1066,773,367,47.54,411,53.17,5.63,0,0.0,,0,195,252,142,153,18.0,Número de eleitores aptos mudou entre turnos: 772 (1T) -> 773 (2T)
+193,LISBOA,0001,0562,1031,773,354,45.8,396,51.23,5.43,0,0.0,,0,143,188,180,197,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+194,TORONTO,0001,1522,1066,773,290,37.52,336,43.47,5.95,0,0.0,,0,118,168,137,160,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+195,LISBOA,0001,0630,1031,773,293,37.95,332,42.95,5.0,0,0.0,,0,193,233,75,95,30.0,"Número de eleitores aptos mudou entre turnos: 772 (1T) -> 773 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+196,LOS ANGELES,0001,1042,1120,773,204,26.36,243,31.44,5.08,0,0.0,,0,103,144,76,95,18.0,Número de eleitores aptos mudou entre turnos: 774 (1T) -> 773 (2T)
+197,EDIMBURGO,0001,1683,1015,773,164,21.24,205,26.52,5.28,0,0.0,,0,125,168,25,35,18.0,Número de eleitores aptos mudou entre turnos: 772 (1T) -> 773 (2T)
+198,LISBOA,0001,0567,1031,772,254,32.9,294,38.08,5.18,0,0.0,,0,122,170,104,120,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+199,LOS ANGELES,0001,1386,1120,772,140,18.16,180,23.32,5.16,0,0.0,,0,70,105,63,70,18.0,Número de eleitores aptos mudou entre turnos: 771 (1T) -> 772 (2T)
+200,LISBOA,0001,0592,1031,771,194,25.16,232,30.09,4.93,0,0.0,,0,78,111,85,113,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 5 regressão(ões) de relógio"
+201,LISBOA,0001,0618,1031,771,173,22.44,193,25.03,2.59,0,0.0,,0,74,105,74,83,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+202,TORONTO,0001,3140,1066,770,400,52.08,439,57.01,4.93,0,0.0,,0,229,282,127,141,32.2,Número de eleitores aptos mudou entre turnos: 768 (1T) -> 770 (2T) | Volume elevado de votos após as 17h00 (1T: 57 votos até 18:10:03; 2T: 0 votos até 17:06:38)
+203,TORONTO,0001,1363,1066,770,289,37.48,332,43.12,5.64,0,0.0,,0,132,172,124,156,18.0,Número de eleitores aptos mudou entre turnos: 771 (1T) -> 770 (2T)
+204,LISBOA,0001,3467,1031,770,147,19.09,178,23.12,4.03,0,0.0,,0,59,93,69,82,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+205,MONTREAL,0001,2996,1104,769,458,59.71,506,65.8,6.09,0,0.0,,0,306,369,103,130,18.0,Número de eleitores aptos mudou entre turnos: 767 (1T) -> 769 (2T)
+206,TORONTO,0001,3111,1066,769,387,50.39,456,59.3,8.91,0,0.0,,0,253,319,102,133,32.5,Número de eleitores aptos mudou entre turnos: 768 (1T) -> 769 (2T) | Volume elevado de votos após as 17h00 (1T: 58 votos até 18:13:16; 2T: 4 votos até 17:07:12)
+207,TORONTO,0001,3021,1066,769,326,42.34,368,47.85,5.51,0,0.0,,0,167,212,123,148,18.0,Número de eleitores aptos mudou entre turnos: 770 (1T) -> 769 (2T)
+208,LISBOA,0001,3109,1031,769,231,30.0,259,33.68,3.68,0,0.0,,0,154,188,53,67,30.0,"Número de eleitores aptos mudou entre turnos: 770 (1T) -> 769 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+209,LISBOA,0001,0635,1031,769,190,24.74,253,32.9,8.16,0,0.0,,0,101,150,72,99,18.0,Número de eleitores aptos mudou entre turnos: 768 (1T) -> 769 (2T)
+210,LISBOA,0001,0581,1031,769,192,24.94,217,28.22,3.28,0,0.0,,0,73,109,89,104,30.0,"Número de eleitores aptos mudou entre turnos: 770 (1T) -> 769 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+211,ESTOCOLMO,0001,1845,1015,768,433,56.45,437,56.9,0.45,0,0.0,,0,274,315,93,105,18.0,Número de eleitores aptos mudou entre turnos: 767 (1T) -> 768 (2T)
+212,FRANKFURT,0001,2871,1040,767,251,32.77,279,36.38,3.61,0,0.0,,0,168,207,57,69,30.0,"Número de eleitores aptos mudou entre turnos: 766 (1T) -> 767 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+213,PARIS,0001,3809,1066,766,458,59.87,487,63.58,3.71,0,0.0,,0,361,408,69,74,18.0,Número de eleitores aptos mudou entre turnos: 765 (1T) -> 766 (2T)
+214,SYDNEY,0001,1960,1031,766,404,52.81,448,58.49,5.68,0,0.0,,0,221,251,130,180,30.0,"Número de eleitores aptos mudou entre turnos: 765 (1T) -> 766 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+215,LISBOA,0001,3844,1080,766,367,47.97,408,53.26,5.29,0,0.0,,0,185,229,142,172,18.0,Número de eleitores aptos mudou entre turnos: 765 (1T) -> 766 (2T)
+216,MUNIQUE,0001,0108,1031,766,211,27.58,257,33.55,5.97,0,0.0,,0,130,178,54,71,18.0,Número de eleitores aptos mudou entre turnos: 765 (1T) -> 766 (2T)
+217,LISBOA,0001,3819,1080,765,362,47.32,406,53.07,5.75,0,0.0,,0,203,253,128,148,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 3 regressão(ões) de relógio"
+218,DUBLIN,0001,3302,1015,765,373,48.89,400,52.29,3.4,0,0.0,,0,269,325,66,70,30.0,"Número de eleitores aptos mudou entre turnos: 763 (1T) -> 765 (2T) | Evento operacional no log: 4 reinício(s) durante votação, 0 regressão(ões) de relógio"
+219,MONTREAL,0001,1039,1104,763,501,65.83,539,70.64,4.81,0,0.0,,0,289,350,140,166,18.0,Número de eleitores aptos mudou entre turnos: 761 (1T) -> 763 (2T)
+220,MADRI,0001,0005,1023,763,346,45.29,385,50.46,5.17,0,0.0,,0,187,245,113,127,18.0,Número de eleitores aptos mudou entre turnos: 764 (1T) -> 763 (2T)
+221,DUBLIN,0001,3306,1015,763,345,45.34,382,50.07,4.73,0,0.0,,0,255,311,58,65,30.0,"Número de eleitores aptos mudou entre turnos: 761 (1T) -> 763 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+222,DUBLIN,0001,3305,1015,763,265,34.69,324,42.46,7.77,0,0.0,,0,197,269,44,53,30.0,"Número de eleitores aptos mudou entre turnos: 764 (1T) -> 763 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+223,BERLIM,0001,3908,1040,762,247,32.41,301,39.5,7.09,0,0.0,,0,186,239,36,59,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+224,LISBOA,0001,3635,1080,762,258,33.99,300,39.37,5.38,0,0.0,,0,137,175,92,119,18.0,Número de eleitores aptos mudou entre turnos: 759 (1T) -> 762 (2T)
+225,OSLO,0001,0477,1015,761,315,41.45,365,47.96,6.51,0,0.0,,0,206,266,70,94,18.0,Número de eleitores aptos mudou entre turnos: 760 (1T) -> 761 (2T)
+226,BRUXELAS,0001,1936,1015,760,392,51.51,418,55.0,3.49,0,0.0,,0,200,246,148,166,30.0,"Número de eleitores aptos mudou entre turnos: 761 (1T) -> 760 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+227,LISBOA,0001,3895,1080,758,340,44.97,408,53.83,8.86,0,0.0,,0,205,266,103,138,18.0,Número de eleitores aptos mudou entre turnos: 756 (1T) -> 758 (2T)
+228,LISBOA,0001,3879,1080,757,415,54.82,481,63.54,8.72,0,0.0,,0,280,344,105,131,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+229,LISBOA,0001,3806,1080,756,430,56.8,493,65.21,8.41,0,0.0,,0,263,321,141,167,18.0,Número de eleitores aptos mudou entre turnos: 757 (1T) -> 756 (2T)
+230,LISBOA,0001,3760,1080,755,411,54.51,478,63.31,8.8,0,0.0,,0,246,309,132,161,18.0,Número de eleitores aptos mudou entre turnos: 754 (1T) -> 755 (2T)
+231,LISBOA,0001,3600,1080,754,293,38.81,356,47.21,8.4,0,0.0,,0,182,239,86,111,18.0,Número de eleitores aptos mudou entre turnos: 755 (1T) -> 754 (2T)
+232,DUBLIN,0001,3108,1015,754,320,42.55,348,46.15,3.6,0,0.0,,0,250,297,48,51,30.0,"Número de eleitores aptos mudou entre turnos: 752 (1T) -> 754 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+233,ROMA,0001,0887,1015,754,190,25.23,217,28.78,3.55,0,0.0,,0,104,140,60,74,18.0,Número de eleitores aptos mudou entre turnos: 753 (1T) -> 754 (2T)
+234,LISBOA,0001,3810,1080,753,398,52.93,468,62.15,9.22,0,0.0,,0,231,304,133,161,18.0,Número de eleitores aptos mudou entre turnos: 752 (1T) -> 753 (2T)
+235,LISBOA,0001,3656,1080,753,293,38.96,332,44.09,5.13,0,0.0,,0,176,224,87,102,18.0,Número de eleitores aptos mudou entre turnos: 752 (1T) -> 753 (2T)
+236,LOS ANGELES,0001,0863,1023,753,252,33.38,316,41.97,8.59,0,0.0,,0,165,214,64,98,30.0,"Número de eleitores aptos mudou entre turnos: 755 (1T) -> 753 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+237,ESTOCOLMO,0001,1843,1015,752,441,58.57,465,61.84,3.27,0,0.0,,0,286,341,103,117,18.0,Número de eleitores aptos mudou entre turnos: 753 (1T) -> 752 (2T)
+238,LISBOA,0001,3517,1080,752,312,41.54,370,49.2,7.66,0,0.0,,0,197,260,81,100,18.0,Número de eleitores aptos mudou entre turnos: 751 (1T) -> 752 (2T)
+239,BERLIM,0001,3057,1040,751,408,54.26,456,60.72,6.46,0,0.0,,0,327,394,54,54,30.3,Número de eleitores aptos mudou entre turnos: 752 (1T) -> 751 (2T) | Comparecimento destoante da própria escola: 60.7% nesta sala vs 45.4% nas salas vizinhas (+15.3 p.p.)
+240,LISBOA,0001,3699,1080,751,369,49.07,426,56.72,7.65,0,0.0,,0,223,280,104,140,30.0,"Número de eleitores aptos mudou entre turnos: 752 (1T) -> 751 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+241,LISBOA,0001,3744,1080,751,372,49.6,422,56.19,6.59,0,0.0,,0,225,275,109,135,18.0,Número de eleitores aptos mudou entre turnos: 750 (1T) -> 751 (2T)
+242,BRUXELAS,0001,1939,1015,751,388,51.73,405,53.93,2.2,0,0.0,,0,199,237,146,158,33.0,Número de eleitores aptos mudou entre turnos: 750 (1T) -> 751 (2T) | Volume elevado de votos após as 17h00 (1T: 60 votos até 18:19:49; 2T: 0 votos até 17:05:14)
+243,VARSÓVIA,0001,1014,1015,750,291,38.9,363,48.4,9.5,0,0.0,,0,183,268,65,89,18.0,Número de eleitores aptos mudou entre turnos: 748 (1T) -> 750 (2T)
+244,LISBOA,0001,3623,1080,750,274,36.63,340,45.33,8.7,0,0.0,,0,174,239,69,96,18.0,Número de eleitores aptos mudou entre turnos: 748 (1T) -> 750 (2T)
+245,LISBOA,0001,3678,1080,749,374,49.87,420,56.07,6.2,0,0.0,,0,233,285,103,127,18.0,Número de eleitores aptos mudou entre turnos: 750 (1T) -> 749 (2T)
+246,LISBOA,0001,3642,1080,749,281,37.62,328,43.79,6.17,0,0.0,,0,175,221,78,101,18.0,Número de eleitores aptos mudou entre turnos: 747 (1T) -> 749 (2T)
+247,NOVA YORK,0001,0310,1082,748,178,23.86,242,32.35,8.49,0,0.0,,0,101,156,66,83,30.0,"Número de eleitores aptos mudou entre turnos: 746 (1T) -> 748 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+248,NOVA YORK,0001,0319,1082,748,180,24.06,217,29.01,4.95,0,0.0,,0,71,99,87,112,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+249,VANCOUVER,0001,3268,1031,747,362,48.4,419,56.09,7.69,0,0.0,,0,203,270,108,133,18.0,Número de eleitores aptos mudou entre turnos: 748 (1T) -> 747 (2T)
+250,LISBOA,0001,3545,1080,747,268,35.92,314,42.03,6.11,0,0.0,,0,156,215,74,93,18.0,Número de eleitores aptos mudou entre turnos: 746 (1T) -> 747 (2T)
+251,NOVA YORK,0001,0295,1082,747,171,22.89,213,28.51,5.62,0,0.0,,0,62,93,95,116,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+252,ESTOCOLMO,0001,0929,1015,746,310,41.55,334,44.77,3.22,0,0.0,,0,210,257,56,69,11.6,Comparecimento destoante da própria escola: 44.8% nesta sala vs 59.2% nas salas vizinhas (-14.5 p.p.)
+253,VANCOUVER,0001,3100,1031,745,415,55.7,437,58.66,2.96,0,0.0,,0,283,330,82,90,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+254,LISBOA,0001,3565,1080,744,272,36.56,330,44.35,7.79,0,0.0,,0,205,262,44,64,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+255,NOVA YORK,0001,0285,1082,744,259,34.81,308,41.4,6.59,0,0.0,,0,100,138,139,166,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+256,LISBOA,0001,3890,1080,741,395,53.38,449,60.59,7.21,0,0.0,,0,242,296,126,144,18.0,Número de eleitores aptos mudou entre turnos: 740 (1T) -> 741 (2T)
+257,VANCOUVER,0001,3157,1031,741,395,53.38,438,59.11,5.73,0,0.0,,0,253,324,88,102,18.0,Número de eleitores aptos mudou entre turnos: 740 (1T) -> 741 (2T)
+258,NOVA YORK,0001,0309,1082,741,174,23.45,232,31.31,7.86,0,0.0,,0,103,153,58,76,18.0,Número de eleitores aptos mudou entre turnos: 742 (1T) -> 741 (2T)
+259,NOVA YORK,0001,0286,1082,741,166,22.37,216,29.15,6.78,0,0.0,,0,79,118,77,96,30.0,"Número de eleitores aptos mudou entre turnos: 742 (1T) -> 741 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+260,LISBOA,0001,3534,1080,740,313,42.35,362,48.92,6.57,0,0.0,,0,238,295,45,66,18.0,Número de eleitores aptos mudou entre turnos: 739 (1T) -> 740 (2T)
+261,XANGAI,0001,0483,1015,740,197,26.66,264,35.68,9.02,0,0.0,,0,116,182,41,66,18.0,Número de eleitores aptos mudou entre turnos: 739 (1T) -> 740 (2T)
+262,HOUSTON,0001,0563,1023,739,220,29.81,234,31.66,1.85,0,0.0,,0,71,96,103,128,18.0,Número de eleitores aptos mudou entre turnos: 738 (1T) -> 739 (2T)
+263,HOUSTON,0001,0134,1023,738,229,31.11,244,33.06,1.95,0,0.0,,0,70,98,128,142,18.0,Número de eleitores aptos mudou entre turnos: 736 (1T) -> 738 (2T)
+264,HOUSTON,0001,0602,1023,736,209,28.44,228,30.98,2.54,0,0.0,,0,58,77,123,139,30.0,"Número de eleitores aptos mudou entre turnos: 735 (1T) -> 736 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+265,CHICAGO,0001,0082,1015,736,187,25.41,224,30.43,5.02,0,0.0,,0,98,138,74,84,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+266,CHICAGO,0001,0645,1015,736,112,15.18,152,20.65,5.47,0,0.0,,0,51,93,49,55,18.0,Número de eleitores aptos mudou entre turnos: 738 (1T) -> 736 (2T)
+267,LISBOA,0001,1420,1031,735,257,34.92,297,40.41,5.49,0,0.0,,0,116,149,106,140,18.0,Número de eleitores aptos mudou entre turnos: 736 (1T) -> 735 (2T)
+268,LISBOA,0001,0628,1031,735,239,32.56,287,39.05,6.49,0,0.0,,0,131,175,84,107,18.0,Número de eleitores aptos mudou entre turnos: 734 (1T) -> 735 (2T)
+269,FRANKFURT,0001,1620,1040,732,309,42.04,354,48.36,6.32,0,0.0,,0,232,283,52,69,18.0,Número de eleitores aptos mudou entre turnos: 735 (1T) -> 732 (2T)
+270,CHICAGO,0001,1268,1015,732,113,15.44,145,19.81,4.37,0,0.0,,0,45,77,56,66,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+271,MUNIQUE,0001,0102,1031,729,397,54.53,445,61.04,6.51,0,0.0,,0,246,317,87,118,18.0,Número de eleitores aptos mudou entre turnos: 728 (1T) -> 729 (2T)
+272,CIUDAD DEL ESTE,0001,0556,1015,729,362,49.66,428,58.71,9.05,0,0.0,,0,19,26,324,393,13.5,Volume elevado de votos após as 17h00 (1T: 54 votos até 18:23:35; 2T: 0 votos até 17:04:49)
+273,NOVA YORK,0001,0284,1082,726,195,26.86,249,34.3,7.44,0,0.0,,0,88,129,89,119,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+274,BERLIM,0001,1717,1015,725,357,49.31,373,51.45,2.14,0,0.0,,0,286,330,35,36,18.0,Número de eleitores aptos mudou entre turnos: 724 (1T) -> 725 (2T)
+275,LOS ANGELES,0001,0674,1023,723,186,25.73,226,31.26,5.53,0,0.0,,0,97,138,67,82,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 4 regressão(ões) de relógio"
+276,LISBOA,0001,3878,1080,717,331,46.23,370,51.6,5.37,0,0.0,,0,147,200,141,163,18.0,Número de eleitores aptos mudou entre turnos: 716 (1T) -> 717 (2T)
+277,FRANKFURT,0001,1612,1040,713,276,38.66,292,40.95,2.29,0,0.0,,0,183,214,68,76,18.0,Número de eleitores aptos mudou entre turnos: 714 (1T) -> 713 (2T)
+278,MONTREAL,0001,0256,1023,713,234,32.91,268,37.59,4.68,0,0.0,,0,138,169,69,89,38.0,Número de eleitores aptos mudou entre turnos: 711 (1T) -> 713 (2T) | Comparecimento destoante da própria escola: 37.6% nesta sala vs 62.5% nas salas vizinhas (-25.0 p.p.)
+279,ESTOCOLMO,0001,1849,1023,712,323,45.3,382,53.65,8.35,0,0.0,,0,234,307,51,66,18.0,Número de eleitores aptos mudou entre turnos: 713 (1T) -> 712 (2T)
+280,SANTIAGO,0001,0404,1015,711,382,53.8,399,56.12,2.32,0,0.0,,0,173,209,161,176,18.0,Número de eleitores aptos mudou entre turnos: 710 (1T) -> 711 (2T)
+281,SANTIAGO,0001,0571,1015,710,421,59.38,438,61.69,2.31,0,0.0,,0,210,241,150,183,18.0,Número de eleitores aptos mudou entre turnos: 709 (1T) -> 710 (2T)
+282,SANTIAGO,0001,0405,1015,709,463,65.4,466,65.73,0.33,0,0.0,,0,207,250,167,197,18.0,Número de eleitores aptos mudou entre turnos: 708 (1T) -> 709 (2T)
+283,FRANKFURT,0001,1613,1040,709,313,44.02,343,48.38,4.36,0,0.0,,0,216,258,60,81,18.0,Número de eleitores aptos mudou entre turnos: 711 (1T) -> 709 (2T)
+284,CHICAGO,0001,0743,1015,709,152,21.47,166,23.41,1.94,0,0.0,,0,78,104,46,57,18.0,Número de eleitores aptos mudou entre turnos: 708 (1T) -> 709 (2T)
+285,FRANKFURT,0001,0946,1040,705,366,51.77,423,60.0,8.23,0,0.0,,0,256,329,73,85,18.0,Número de eleitores aptos mudou entre turnos: 707 (1T) -> 705 (2T)
+286,MUNIQUE,0001,0105,1031,704,198,28.17,225,31.96,3.79,0,0.0,,0,125,176,42,48,18.0,Número de eleitores aptos mudou entre turnos: 703 (1T) -> 704 (2T)
+287,MILÃO,0001,0395,1040,702,288,41.03,316,45.01,3.98,0,0.0,,0,148,185,87,127,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+288,CAMBERRA,0001,0742,1031,699,426,60.94,463,66.24,5.3,0,0.0,,0,191,231,176,217,20.5,"Evento operacional no log: 0 reinício(s) durante votação, 4 regressão(ões) de relógio | Comparecimento destoante da própria escola: 66.2% nesta sala vs 55.7% nas salas vizinhas (+10.6 p.p.)"
+289,VIENA,0001,0967,1015,697,397,57.2,416,59.68,2.48,0,0.0,,0,254,291,87,109,18.0,Número de eleitores aptos mudou entre turnos: 694 (1T) -> 697 (2T)
+290,VIENA,0001,0964,1015,697,337,48.28,363,52.08,3.8,0,0.0,,0,221,270,75,87,18.0,Número de eleitores aptos mudou entre turnos: 698 (1T) -> 697 (2T)
+291,NOVA YORK,0001,0321,1082,697,257,36.93,288,41.32,4.39,0,0.0,,0,110,146,121,137,18.0,Número de eleitores aptos mudou entre turnos: 696 (1T) -> 697 (2T)
+292,WELLINGTON,0001,1088,1015,697,40,5.75,73,10.47,4.72,0,0.0,,0,31,60,6,13,30.0,"Número de eleitores aptos mudou entre turnos: 696 (1T) -> 697 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+293,NOVA YORK,0001,0294,1082,691,243,35.12,311,45.01,9.89,0,0.0,,0,154,212,66,91,18.0,Número de eleitores aptos mudou entre turnos: 692 (1T) -> 691 (2T)
+294,PRAGA,0001,0832,1015,690,411,59.57,406,58.84,-0.73,0,0.0,,0,279,304,70,86,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+295,BOSTON,0001,0922,1023,690,185,26.81,241,34.93,8.12,0,0.0,,0,68,104,101,133,11.1,"Divergência na mesma escola (local 1023): Cand. 22 teve 56.1% nesta sala vs 70.0% nas outras 44 salas (-13.9 p.p., Z=-3.9)"
+296,MILÃO,0001,0445,1040,689,353,51.23,384,55.73,4.5,0,0.0,,0,168,215,144,162,29.6,"Evento operacional no log: 2 reinício(s) durante votação, 2 regressão(ões) de relógio | Comparecimento destoante da própria escola: 55.7% nesta sala vs 33.8% nas salas vizinhas (+22.0 p.p.)"
+297,NOVA YORK,0001,0293,1082,689,253,36.67,300,43.54,6.87,0,0.0,,0,159,211,72,83,46.2,"Número de eleitores aptos mudou entre turnos: 690 (1T) -> 689 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio | Divergência na mesma escola (local 1082): Cand. 22 teve 28.2% nesta sala vs 48.5% nas outras 52 salas (-20.2 p.p., Z=-3.0)"
+298,CHICAGO,0001,0867,1015,684,112,16.35,134,19.59,3.24,0,0.0,,0,69,96,32,36,18.0,Número de eleitores aptos mudou entre turnos: 685 (1T) -> 684 (2T)
+299,MARSELHA,0001,3636,1015,680,229,33.73,279,41.03,7.3,0,0.0,,0,187,250,27,27,18.0,Número de eleitores aptos mudou entre turnos: 679 (1T) -> 680 (2T)
+300,OTTAWA,0001,0332,1015,676,439,65.04,462,68.34,3.3,0,0.0,,0,234,285,123,155,18.0,Número de eleitores aptos mudou entre turnos: 675 (1T) -> 676 (2T)
+301,FRANKFURT,0001,1602,1031,676,280,41.42,321,47.49,6.07,0,0.0,,0,184,232,71,82,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 4 regressão(ões) de relógio"
+302,COPENHAGUE,0001,1697,1015,675,314,46.59,369,54.67,8.08,0,0.0,,0,234,303,46,55,18.0,Número de eleitores aptos mudou entre turnos: 674 (1T) -> 675 (2T)
+303,DUBLIN,0001,3179,1015,672,349,52.09,390,58.04,5.95,0,0.0,,0,264,318,49,67,30.0,"Número de eleitores aptos mudou entre turnos: 670 (1T) -> 672 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+304,OTTAWA,0001,0333,1015,671,389,58.06,410,61.1,3.04,0,0.0,,0,214,248,109,135,18.0,Número de eleitores aptos mudou entre turnos: 670 (1T) -> 671 (2T)
+305,CAIENA,0001,0072,1015,665,260,39.1,290,43.61,4.51,0,0.0,,0,99,136,128,137,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+306,VANCOUVER,0001,1293,1040,664,203,30.57,251,37.8,7.23,0,0.0,,0,84,128,92,116,14.3,Comparecimento destoante da própria escola: 37.8% nesta sala vs 55.6% nas salas vizinhas (-17.8 p.p.)
+307,MUNIQUE,0001,0114,1031,655,332,50.84,387,59.08,8.24,0,0.0,,0,202,279,83,102,18.0,Número de eleitores aptos mudou entre turnos: 653 (1T) -> 655 (2T)
+308,MUNIQUE,0001,0120,1031,655,276,42.07,313,47.79,5.72,0,0.0,,0,173,232,58,74,18.0,Número de eleitores aptos mudou entre turnos: 656 (1T) -> 655 (2T)
+309,MILÃO,0001,0430,1040,655,203,31.04,235,35.88,4.84,0,0.0,,0,112,155,62,73,18.0,Número de eleitores aptos mudou entre turnos: 654 (1T) -> 655 (2T)
+310,MILÃO,0001,0420,1040,653,197,30.21,243,37.21,7.0,0,0.0,,0,104,155,68,82,18.0,Número de eleitores aptos mudou entre turnos: 652 (1T) -> 653 (2T)
+311,MILÃO,0001,0421,1040,653,185,28.33,214,32.77,4.44,0,0.0,,0,89,120,80,89,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+312,MILÃO,0001,0418,1040,653,161,24.69,183,28.02,3.33,0,0.0,,0,73,98,61,83,18.0,Número de eleitores aptos mudou entre turnos: 652 (1T) -> 653 (2T)
+313,MILÃO,0001,0442,1040,651,160,24.62,183,28.11,3.49,0,0.0,,0,74,100,65,76,18.0,Número de eleitores aptos mudou entre turnos: 650 (1T) -> 651 (2T)
+314,MUNIQUE,0001,0119,1031,641,223,34.84,299,46.65,11.81,0,0.0,,0,158,230,48,64,32.2,"Salto de comparecimento de 34.8% (1T) para 46.6% (2T) (+11.8 p.p., Z=1.9) | Número de eleitores aptos mudou entre turnos: 640 (1T) -> 641 (2T)"
+315,HELSINQUE,0001,0381,1015,640,364,56.79,384,60.0,3.21,0,0.0,,0,237,269,87,107,30.0,"Número de eleitores aptos mudou entre turnos: 641 (1T) -> 640 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+316,OSLO,0001,0478,1015,640,228,35.79,286,44.69,8.9,0,0.0,,0,154,222,49,56,18.0,Número de eleitores aptos mudou entre turnos: 637 (1T) -> 640 (2T)
+317,MUNIQUE,0001,0115,1031,640,207,32.29,243,37.97,5.68,0,0.0,,0,135,183,48,56,18.0,Número de eleitores aptos mudou entre turnos: 641 (1T) -> 640 (2T)
+318,HELSINQUE,0001,0382,1015,638,354,55.57,372,58.31,2.74,0,0.0,,0,238,281,68,78,18.0,Número de eleitores aptos mudou entre turnos: 637 (1T) -> 638 (2T)
+319,MUNIQUE,0001,0117,1031,638,215,33.7,282,44.2,10.5,0,0.0,,0,144,221,47,57,12.6,"Salto de comparecimento de 33.7% (1T) para 44.2% (2T) (+10.5 p.p., Z=1.4)"
+320,CHICAGO,0001,0589,1015,634,133,20.94,167,26.34,5.4,0,0.0,,0,77,110,39,55,30.0,"Número de eleitores aptos mudou entre turnos: 635 (1T) -> 634 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+321,MILÃO,0001,0447,1040,627,174,27.75,212,33.81,6.06,0,0.0,,0,83,116,73,91,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 2 regressão(ões) de relógio"
+322,DUBLIN,0001,3311,1015,626,384,61.34,417,66.61,5.27,0,0.0,,0,281,330,66,82,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+323,CHICAGO,0001,0995,1015,625,230,36.86,250,40.0,3.14,0,0.0,,0,116,156,87,89,18.0,Número de eleitores aptos mudou entre turnos: 624 (1T) -> 625 (2T)
+324,WASHINGTON,0001,0462,1031,624,152,24.36,176,28.21,3.85,0,0.0,,0,69,94,63,77,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+325,ROMA,0001,0861,1015,615,225,36.7,263,42.76,6.06,0,0.0,,0,119,166,61,90,18.0,Número de eleitores aptos mudou entre turnos: 613 (1T) -> 615 (2T)
+326,WASHINGTON,0001,0745,1031,614,161,26.31,203,33.06,6.75,0,0.0,,0,67,104,73,95,18.0,Número de eleitores aptos mudou entre turnos: 612 (1T) -> 614 (2T)
+327,DUBLIN,0001,3309,1015,613,278,45.28,307,50.08,4.8,0,0.0,,0,204,244,48,60,30.0,"Número de eleitores aptos mudou entre turnos: 614 (1T) -> 613 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+328,WASHINGTON,0001,0850,1031,613,210,34.31,229,37.36,3.05,0,0.0,,0,104,139,73,87,18.0,Número de eleitores aptos mudou entre turnos: 612 (1T) -> 613 (2T)
+329,DUBLIN,0001,3229,1015,602,318,52.91,342,56.81,3.9,0,0.0,,0,235,282,59,57,30.0,"Número de eleitores aptos mudou entre turnos: 601 (1T) -> 602 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+330,COPENHAGUE,0001,1411,1015,591,291,49.32,318,53.81,4.49,0,0.0,,0,245,283,20,27,18.0,Número de eleitores aptos mudou entre turnos: 590 (1T) -> 591 (2T)
+331,ROMA,0001,0835,1015,591,159,26.9,191,32.32,5.42,0,0.0,,0,95,130,49,56,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+332,ASSUNÇÃO,0001,0008,1023,573,281,49.13,305,53.23,4.1,0,0.0,,0,59,85,183,208,18.0,Número de eleitores aptos mudou entre turnos: 572 (1T) -> 573 (2T)
+333,LOS ANGELES,0001,0193,1023,570,142,24.96,149,26.14,1.18,0,0.0,,0,72,83,49,61,30.0,"Número de eleitores aptos mudou entre turnos: 569 (1T) -> 570 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+334,DUBLIN,0001,3216,1015,568,278,48.94,297,52.29,3.35,0,0.0,,0,224,251,32,44,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 1 regressão(ões) de relógio"
+335,FRANKFURT,0001,1592,1031,567,267,47.17,302,53.26,6.09,0,0.0,,0,175,226,52,63,18.0,Número de eleitores aptos mudou entre turnos: 566 (1T) -> 567 (2T)
+336,FRANKFURT,0001,1599,1031,567,255,45.05,278,49.03,3.98,0,0.0,,0,128,167,87,101,18.0,Número de eleitores aptos mudou entre turnos: 566 (1T) -> 567 (2T)
+337,FRANKFURT,0001,1595,1031,567,235,41.37,256,45.15,3.78,0,0.0,,0,140,164,66,85,30.0,"Número de eleitores aptos mudou entre turnos: 568 (1T) -> 567 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+338,FRANKFURT,0001,1596,1031,566,250,44.17,268,47.35,3.18,0,0.0,,0,143,174,71,83,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio"
+339,MUNIQUE,0001,0111,1031,550,256,46.55,312,56.73,10.18,0,0.0,,0,141,194,78,114,24.2,"Salto de comparecimento de 46.5% (1T) para 56.7% (2T) (+10.2 p.p., Z=1.3) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+340,BERLIM,0001,1720,1015,550,281,50.91,305,55.45,4.54,0,0.0,,0,227,267,25,32,30.0,"Número de eleitores aptos mudou entre turnos: 552 (1T) -> 550 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 2 regressão(ões) de relógio"
+341,MUNIQUE,0001,0101,1031,546,203,37.32,267,48.9,11.58,0,0.0,,0,121,189,61,74,31.9,"Salto de comparecimento de 37.3% (1T) para 48.9% (2T) (+11.6 p.p., Z=1.8) | Número de eleitores aptos mudou entre turnos: 544 (1T) -> 546 (2T)"
+342,BRUXELAS,0001,3097,1015,528,290,54.82,314,59.47,4.65,0,0.0,,0,184,212,87,99,18.0,Número de eleitores aptos mudou entre turnos: 529 (1T) -> 528 (2T)
+343,BARCELONA,0001,3888,1015,526,257,48.77,315,59.89,11.12,0,0.0,,0,200,262,41,50,31.3,"Salto de comparecimento de 48.8% (1T) para 59.9% (2T) (+11.1 p.p., Z=2.6) | Número de eleitores aptos mudou entre turnos: 527 (1T) -> 526 (2T)"
+344,MUNIQUE,0001,0112,1031,524,232,44.36,255,48.66,4.3,0,0.0,,0,127,163,70,88,18.0,Número de eleitores aptos mudou entre turnos: 523 (1T) -> 524 (2T)
+345,DUBLIN,0001,0517,1015,513,220,42.97,236,46.0,3.03,0,0.0,,0,134,162,57,69,30.0,"Número de eleitores aptos mudou entre turnos: 512 (1T) -> 513 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+346,DUBLIN,0001,0513,1015,499,190,37.92,200,40.08,2.16,0,0.0,,0,114,144,54,54,30.0,"Número de eleitores aptos mudou entre turnos: 501 (1T) -> 499 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+347,MONTREAL,0001,0258,1023,486,272,56.08,315,64.81,8.73,0,0.0,,0,162,211,69,98,18.0,Número de eleitores aptos mudou entre turnos: 485 (1T) -> 486 (2T)
+348,DUBLIN,0001,1160,1015,472,239,50.64,262,55.51,4.87,0,0.0,,0,152,200,53,58,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+349,DUBLIN,0001,1352,1015,462,203,43.94,216,46.75,2.81,0,0.0,,0,143,171,31,37,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+350,DUBLIN,0001,3054,1015,452,256,56.64,284,62.83,6.19,0,0.0,,0,215,252,27,29,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+351,TORONTO,0001,1402,1058,427,245,57.51,274,64.17,6.66,0,0.0,,0,90,133,105,129,18.0,Número de eleitores aptos mudou entre turnos: 426 (1T) -> 427 (2T)
+352,PORTO,0001,3914,1050,404,198,49.01,231,57.18,8.17,0,0.0,,0,89,121,88,103,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+353,DUBLIN,0001,3862,1015,400,302,75.5,306,76.5,1.0,0,0.0,,0,198,224,76,77,12.0,"Evento operacional no log: 2 reinício(s) durante votação, 0 regressão(ões) de relógio"
+354,SYDNEY,0001,3729,1031,400,229,57.25,260,65.0,7.75,0,0.0,,0,134,166,67,90,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+355,ESTOCOLMO,0001,3165,1023,397,265,66.92,279,70.28,3.36,0,0.0,,0,176,205,60,69,18.0,Número de eleitores aptos mudou entre turnos: 396 (1T) -> 397 (2T)
+356,LONDRES,0001,3296,1015,397,211,53.28,247,62.22,8.94,0,0.0,,0,142,173,58,73,18.0,Número de eleitores aptos mudou entre turnos: 396 (1T) -> 397 (2T)
+357,DUBLIN,0001,3308,1015,396,204,51.52,241,60.86,9.34,0,0.0,,0,160,199,25,40,12.0,"Evento operacional no log: 4 reinício(s) durante votação, 0 regressão(ões) de relógio"
+358,AMSTERDÃ,0001,3310,1015,396,215,54.43,229,57.83,3.4,0,0.0,,0,162,188,33,38,18.0,Número de eleitores aptos mudou entre turnos: 395 (1T) -> 396 (2T)
+359,CAMBERRA,0001,0749,1031,396,206,52.02,222,56.06,4.04,0,0.0,,0,104,131,66,84,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 3 regressão(ões) de relógio"
+360,CAMBERRA,0001,1150,1023,396,166,42.03,176,44.44,2.41,0,0.0,,0,101,121,29,45,27.6,Número de eleitores aptos mudou entre turnos: 395 (1T) -> 396 (2T) | Comparecimento destoante da própria escola: 44.4% nesta sala vs 56.4% nas salas vizinhas (-12.0 p.p.)
+361,MARSELHA,0001,3747,1015,394,178,45.18,206,52.28,7.1,0,0.0,,0,149,184,17,22,11.9,Comparecimento destoante da própria escola: 52.3% nesta sala vs 37.4% nas salas vizinhas (+14.9 p.p.)
+362,OTTAWA,0001,2858,1015,357,199,55.74,216,60.5,4.76,0,0.0,,0,119,160,43,51,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+363,TALIN,0001,1282,1015,318,197,61.56,201,63.21,1.65,0,0.0,,0,142,160,19,33,30.0,"Número de eleitores aptos mudou entre turnos: 320 (1T) -> 318 (2T) | Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
+364,CAMBERRA,0001,0736,1015,274,89,32.72,102,37.23,4.51,0,0.0,,0,46,62,33,37,33.6,Número de eleitores aptos mudou entre turnos: 272 (1T) -> 274 (2T) | Comparecimento destoante da própria escola: 37.2% nesta sala vs 17.8% nas salas vizinhas (+19.4 p.p.)
+365,WASHINGTON,0001,1555,1031,233,115,49.78,118,50.64,0.86,0,0.0,,0,86,96,14,18,51.8,"Número de eleitores aptos mudou entre turnos: 231 (1T) -> 233 (2T) | Evento operacional no log: 2 reinício(s) durante votação, 1 regressão(ões) de relógio | Divergência na mesma escola (local 1031): Cand. 22 teve 15.8% nesta sala vs 43.0% nas outras 30 salas (-27.2 p.p., Z=-4.4)"
+366,ROMA,0001,0888,1015,221,74,33.48,88,39.82,6.34,0,0.0,,0,41,55,25,32,12.0,"Evento operacional no log: 0 reinício(s) durante votação, 1 regressão(ões) de relógio"
